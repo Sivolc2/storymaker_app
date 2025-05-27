@@ -20,13 +20,14 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
     useEffect(() => {
         if (project) {
             setOutlineText(project.outline.content);
-            if (!project.outline.content && !project.outline.isApproved) {
-                setIsEditing(true);
-            } else if (project.outline.isApproved) {
+            // Determine editing state based on approval status
+            if (project.outline.isApproved) {
                 setIsEditing(false);
+            } else {
+                setIsEditing(true); // If not approved (new, draft, or revised), allow editing
             }
         }
-    }, [project?.outline.content, project?.outline.isApproved]);
+    }, [project?.outline.content, project?.outline.isApproved, project]);
 
     useEffect(() => {
         // Clear success message after 3 seconds

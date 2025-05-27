@@ -27,13 +27,15 @@ type StorymakerView =
     | `doc_${string}` // For viewing/editing uploaded documents
     | `scene_${string}_${string}`; // For editing specific scenes
 
+type MainStorymakerArtifactType = 'concept' | 'outline' | 'worldbuilding' | 'sceneBreakdowns';
+
 interface SystemaWriterPageProps {
     apiUrl: string;
 }
 
 const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
-    const { project, removeUploadedDocument, addUploadedDocument, updateUploadedDocumentContent } = useProject();
-    const [activeView, setActiveView] = useState<StorymakerView>('project_setup');
+    const { project, removeUploadedDocument, addUploadedDocument, updateUploadedDocumentContent, updateArtifact } = useProject();
+    const [activeView, setActiveView] = useState<StorymakerView>(project ? 'concept' : 'project_setup');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
@@ -56,25 +58,31 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
         setActiveView(view);
     };
     
-    const handleEditArtifact = (artifact: 'concept' | 'outline' | 'worldbuilding' | 'sceneBreakdowns' | UploadedDocumentType | SceneNarrativeType) => {
-        if (typeof artifact === 'string') {
-            // It's a main artifact type
-            const viewMap: Record<string, StorymakerView> = {
-                'concept': 'concept',
-                'outline': 'outline',
-                'worldbuilding': 'worldbuilding',
-                'sceneBreakdowns': 'scene_breakdowns'
-            };
-            setActiveView(viewMap[artifact] || artifact as StorymakerView);
-            setEditingDocument(null); // Ensure document editor is closed if a main tab is clicked
-        } else if ('content' in artifact && 'type' in artifact) { // UploadedDocument
-            console.log("Viewing/editing uploaded document:", artifact.name);
-            setEditingDocument(artifact);
-            setActiveView('project_setup'); // Or keep current tab view and overlay, for now switch to project_setup to show editor
-            // No, better: render editor instead of tab content if editingDocument is set
-            // setActiveView(`doc_${artifact.id}`); // If we had a viewer
-        } else if ('sceneIdentifier' in artifact) { // SceneNarrative
-            setEditingSceneDetails({ chapterTitle: artifact.chapterTitle, sceneIdentifier: artifact.sceneIdentifier });
+    const handleEditArtifact = (
+        artifactSource: MainStorymakerArtifactType | UploadedDocumentType | SceneNarrativeType
+    ) => {
+        setEditingDocument(null); // Close document editor if open
+    
+        if (typeof artifactSource === 'string') {
+            // Main artifacts: concept, outline, worldbuilding, sceneBreakdowns
+            const artifactName = artifactSource as MainStorymakerArtifactType;
+            
+            if (project && project[artifactName]) {
+                // Set the artifact to not approved, keeping its current content.
+                // This will trigger the useEffect in the respective tab to allow editing.
+                updateArtifact(artifactName, project[artifactName].content, false);
+                
+                const viewMap: Record<MainStorymakerArtifactType, StorymakerView> = {
+                    'concept': 'concept', 'outline': 'outline',
+                    'worldbuilding': 'worldbuilding', 'sceneBreakdowns': 'scene_breakdowns'
+                };
+                setActiveView(viewMap[artifactName] || artifactName as StorymakerView);
+            }
+        } else if ('content' in artifactSource && 'type' in artifactSource && 'id' in artifactSource) { // UploadedDocument
+            setEditingDocument(artifactSource);
+            // Document editor will overlay current view
+        } else if ('sceneIdentifier' in artifactSource) { // SceneNarrativeType
+            setEditingSceneDetails({ chapterTitle: artifactSource.chapterTitle, sceneIdentifier: artifactSource.sceneIdentifier });
             setActiveView('scene_writing');
         }
     };
@@ -211,14 +219,11 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
                             <button
                                 key={item.view}
                                 onClick={() => {
-                                    const canProceed = !item.prerequisite || (project && item.prerequisite(project));
                                     setEditingDocument(null); // Close document editor when changing main tabs
                                     if (!project && item.view !== 'project_setup') {
                                         setError("Please create or load a project first.");
-                                    } else if (canProceed) {
+                                    } else {
                                         handleSelectView(item.view as StorymakerView);
-                                    } else if (item.prereqMessage) {
-                                        setError(item.prereqMessage); // Show simple error if prerequisite not met
                                     }
                                 }}
                                 className={activeView === item.view ? 'active' : ''}

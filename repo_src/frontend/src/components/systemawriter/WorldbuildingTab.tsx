@@ -20,13 +20,13 @@ const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, 
     useEffect(() => {
         if (project) {
             setWorldbuildingText(project.worldbuilding.content);
-            if (!project.worldbuilding.content && !project.worldbuilding.isApproved) {
-                setIsEditing(true);
-            } else if (project.worldbuilding.isApproved) {
+            if (project.worldbuilding.isApproved) {
                 setIsEditing(false);
+            } else {
+                setIsEditing(true);
             }
         }
-    }, [project?.worldbuilding.content, project?.worldbuilding.isApproved]);
+    }, [project?.worldbuilding.content, project?.worldbuilding.isApproved, project]);
 
     useEffect(() => {
         if (successMessage) {
