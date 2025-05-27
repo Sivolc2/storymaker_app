@@ -37,6 +37,11 @@
     padding-bottom: 5px;
 }
 
+.global-loading-indicator {
+    font-style: italic;
+    color: var(--accent-color, #64cfff);
+    font-size: 0.9em;
+}
 
 .left-panel-item {
     padding: 8px 10px;
@@ -116,8 +121,12 @@
 
 .main-content-area {
     flex-grow: 1;
-    padding: 20px;
+    /* Padding will be managed by individual tab content or specific containers within main-content-area */
+    /* Remove direct padding here to allow tabs-nav to span full width if desired */
+    padding: 0; 
     overflow-y: auto;
+    display: flex; /* Allow tabs nav and tab content to stack vertically */
+    flex-direction: column; /* Stack nav on top of content */
 }
 
 .collapse-btn-container {
@@ -134,6 +143,12 @@
 }
 .collapse-btn:hover {
     background: var(--hover-bg-color, #555);
+}
+/* Styles for the active tab content area, if needed for consistent padding */
+.sw-tab-content-wrapper { /* Add this class to the div wrapping {renderMainContent()} */
+    padding: 20px;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 

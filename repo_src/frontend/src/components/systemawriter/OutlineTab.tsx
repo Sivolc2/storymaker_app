@@ -9,10 +9,9 @@ interface OutlineTabProps {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
     onOutlineApproved: () => void;
-    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
 }
 
-const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onOutlineApproved, showPrerequisiteWarning }) => {
+const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onOutlineApproved }) => {
     const { project, updateArtifact } = useProject();
     const [outlineText, setOutlineText] = useState(project?.outline.content || '');
     const [isEditing, setIsEditing] = useState(!project?.outline.content);
@@ -63,14 +62,7 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
             setError("Please provide a story concept first.");
             return;
         }
-        if (!project.concept.isApproved) {
-            showPrerequisiteWarning(
-                "The Story Concept is not yet approved. Generating an outline with an unapproved concept might lead to rework. Do you want to proceed?",
-                proceedWithGeneration
-            );
-        } else {
-            proceedWithGeneration();
-        }
+        proceedWithGeneration();
     };
 
     const handleSaveOutline = (approve: boolean) => {
@@ -114,7 +106,7 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
             ) : (
                 <>
                     <div className="action-buttons">
-                        <button onClick={handleGenerateOutline} disabled={isLoading}>
+                        <button onClick={handleGenerateOutline} disabled={isLoading || !project?.concept.content?.trim()}>
                             Generate Outline with AI
                         </button>
                     </div>

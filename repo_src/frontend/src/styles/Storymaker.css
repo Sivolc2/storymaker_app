@@ -252,14 +252,27 @@
 /* For light mode adjustments if your global styles don't cover these variables */
 @media (prefers-color-scheme: light) {
     .step-card {
-        --card-bg-color: #f9f9f9;
-        --heading-color: #007bff;
-        --subheading-color: #0056b3;
-        --border-color: #ddd;
-        --label-color: #333;
-        --card-bg-color-alt: #e9ecef;
+        --card-bg-color: #ffffff;
+        --border-color: #e0e0e0;
+        --text-color: #333333;
+        --text-color-muted: #666666;
+        --input-bg-color: #f8f9fa;
+        --button-primary-bg: #007bff;
+        --button-primary-text: #ffffff;
+        --hover-bg-color: #f0f0f0;
         --accent-color: #007bff;
-        --accent-color-hover: #0056b3;
+        --success-color: #28a745;
+        --error-color: #dc3545;
+        --warning-color: #ffc107;
+        --info-color: #17a2b8;
+        --success-bg: #d4edda;
+        --error-bg: #f8d7da;
+        --warning-bg: #fff3cd;
+        --info-bg: #d1ecf1;
+        --success-border-color: #c3e6cb;
+        --error-border-color: #f5c6cb;
+        --warning-border-color: #ffeaa7;
+        --warning-text-color: #856404;
     }
     .storymaker-container textarea,
     .storymaker-container input[type="text"] {
@@ -317,4 +330,37 @@
     .saved-scenes-info {
         --text-color-muted: #6c757d;
     }
+    .document-editor-card {
+        --accent-color: #007bff;
+    }
+    .document-editor-card textarea {
+        --input-bg-color-darker: #f8f9fa;
+        --border-color-light: #ced4da;
+    }
+    .button-secondary { --button-secondary-bg: #6c757d !important; --button-secondary-text: #fff !important; }
+}
+
+.global-loading-indicator {
+    font-style: italic;
+    color: var(--accent-color, #64cfff);
+    font-size: 0.9em;
+}
+
+.document-editor-card {
+    /* Styles specific to the document editor */
+    border-left: 5px solid var(--accent-color, #64cfff);
+}
+
+.document-editor-card h2 {
+    color: var(--accent-color, #64cfff);
+}
+
+.document-editor-card textarea {
+    background-color: var(--input-bg-color-darker, #1e1e1e); /* Slightly darker for focus */
+    border: 1px solid var(--border-color-light, #555);
+}
+
+.button-secondary { /* For cancel buttons or less prominent actions */
+    background-color: var(--button-secondary-bg, #555) !important;
+    color: var(--button-secondary-text, #e0e0e0) !important;
 } 

@@ -28,6 +28,7 @@ export interface ProjectState {
     worldbuilding: ProjectArtifact;
     sceneBreakdowns: ProjectArtifact; // Stores the raw MD/JSON of all breakdowns
     sceneNarratives: SceneNarrative[]; // Array of individual scene narratives
+    isLoading: boolean; // Global loading state for the project
     // Add more project-specific settings if needed
 }
 
@@ -38,10 +39,12 @@ interface ProjectContextType {
     updateProjectName: (name: string) => void;
     addUploadedDocument: (doc: UploadedDocument) => void;
     removeUploadedDocument: (docId: string) => void;
-    updateArtifact: (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives'>, content: string, isApproved?: boolean) => void;
+    updateUploadedDocumentContent: (docId: string, newContent: string) => void;
+    updateArtifact: (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives' | 'isLoading'>, content: string, isApproved?: boolean) => void;
     updateSceneNarrative: (scene: SceneNarrative) => void;
     getSceneNarrative: (chapterTitle: string, sceneIdentifier: string) => SceneNarrative | undefined;
-    approveArtifact: (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives'>) => void;
+    setProjectLoading: (isLoading: boolean) => void;
+    approveArtifact: (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives' | 'isLoading'>) => void;
     // Add other actions as needed
 }
 
@@ -54,6 +57,7 @@ const initialProjectStateTemplate: Omit<ProjectState, 'projectName'> = {
     worldbuilding: { ...initialArtifactState },
     sceneBreakdowns: { ...initialArtifactState },
     sceneNarratives: [],
+    isLoading: false,
 };
 
 export const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -70,6 +74,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
             worldbuilding: { ...initialArtifactState },
             sceneBreakdowns: { ...initialArtifactState },
             sceneNarratives: [],
+            isLoading: false,
         });
     };
     
@@ -87,8 +92,18 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
         setProject(prev => prev ? { ...prev, uploadedDocuments: prev.uploadedDocuments.filter(d => d.id !== docId) } : null);
     }
 
+    const updateUploadedDocumentContent = (docId: string, newContent: string) => {
+        setProject(prev => {
+            if (!prev) return null;
+            const updatedDocs = prev.uploadedDocuments.map(doc =>
+                doc.id === docId ? { ...doc, content: newContent } : doc
+            );
+            return { ...prev, uploadedDocuments: updatedDocs };
+        });
+    };
+
     const updateArtifact = (
-        artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives'>,
+        artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives' | 'isLoading'>,
         content: string,
         isApprovedUpdate?: boolean // Explicitly pass if approval state is changing
     ) => {
@@ -107,7 +122,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
         });
     };
     
-    const approveArtifact = (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives'>) => {
+    const approveArtifact = (artifactName: keyof Omit<ProjectState, 'projectName' | 'uploadedDocuments' | 'sceneNarratives' | 'isLoading'>) => {
          setProject(prev => {
             if (!prev) return null;
             const currentArtifact = prev[artifactName] as ProjectArtifact;
@@ -142,10 +157,14 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
         return project?.sceneNarratives.find(s => s.chapterTitle === chapterTitle && s.sceneIdentifier === sceneIdentifier);
     };
 
+    const setProjectLoading = (isLoading: boolean) => {
+        setProject(prev => prev ? { ...prev, isLoading: isLoading } : null);
+    };
+
     return (
         <ProjectContext.Provider value={{ 
             project, setProject, createProject, updateProjectName, addUploadedDocument, removeUploadedDocument,
-            updateArtifact, approveArtifact, updateSceneNarrative, getSceneNarrative
+            updateUploadedDocumentContent, updateArtifact, approveArtifact, updateSceneNarrative, getSceneNarrative, setProjectLoading
         }}>
             {children}
         </ProjectContext.Provider>

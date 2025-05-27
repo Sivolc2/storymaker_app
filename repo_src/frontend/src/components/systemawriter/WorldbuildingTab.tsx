@@ -9,10 +9,9 @@ interface WorldbuildingTabProps {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
     onWorldbuildingApproved: () => void;
-    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
 }
 
-const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onWorldbuildingApproved, showPrerequisiteWarning }) => {
+const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onWorldbuildingApproved }) => {
     const { project, updateArtifact } = useProject();
     const [worldbuildingText, setWorldbuildingText] = useState(project?.worldbuilding.content || '');
     const [isEditing, setIsEditing] = useState(!project?.worldbuilding.content);
@@ -64,14 +63,7 @@ const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, 
             setError("Please provide a story concept and outline first.");
             return;
         }
-        if (!project.outline.isApproved) {
-            showPrerequisiteWarning(
-                "The Story Outline is not yet approved. Generating worldbuilding with an unapproved outline might lead to rework. Do you want to proceed?",
-                proceedWithGeneration
-            );
-        } else {
-            proceedWithGeneration();
-        }
+        proceedWithGeneration();
     };
 
     const handleSaveWorldbuilding = (approve: boolean) => {
@@ -115,7 +107,7 @@ const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, 
             ) : (
                 <>
                     <div className="action-buttons">
-                        <button onClick={handleGenerateWorldbuilding} disabled={isLoading}>
+                        <button onClick={handleGenerateWorldbuilding} disabled={isLoading || !project?.concept.content?.trim() || !project?.outline.content?.trim()}>
                             Generate Worldbuilding with AI
                         </button>
                     </div>

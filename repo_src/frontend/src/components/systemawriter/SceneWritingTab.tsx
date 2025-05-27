@@ -8,9 +8,8 @@ interface SceneWritingTabProps {
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
-    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
-    initialSceneDetails?: {chapterTitle: string, sceneIdentifier: string} | null;
-    setInitialSceneDetails?: React.Dispatch<React.SetStateAction<{chapterTitle: string, sceneIdentifier: string} | null>>;
+    initialSceneDetails?: {chapterTitle: string, sceneIdentifier: string, scenePlan?: string} | null;
+    setInitialSceneDetails?: React.Dispatch<React.SetStateAction<{chapterTitle: string, sceneIdentifier: string, scenePlan?: string} | null>>;
 }
 
 const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ 
@@ -18,7 +17,6 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
     isLoading, 
     setIsLoading, 
     setError, 
-    showPrerequisiteWarning,
     initialSceneDetails,
     setInitialSceneDetails
 }) => {
@@ -33,34 +31,33 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
     const [isEditingNarrative, setIsEditingNarrative] = useState<boolean>(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    // Parse scene breakdowns from project
     useEffect(() => {
         if (project && project.sceneBreakdowns.content) {
             try {
                 const parsed = JSON.parse(project.sceneBreakdowns.content);
                 setSceneBreakdownsData(parsed);
-                // Auto-select first chapter if none selected
-                if (!selectedChapter && Object.keys(parsed).length > 0) {
-                    setSelectedChapter(Object.keys(parsed)[0]);
-                }
             } catch {
                 setSceneBreakdownsData({ "All Chapters": project.sceneBreakdowns.content });
-                setSelectedChapter("All Chapters");
             }
         }
-    }, [project?.sceneBreakdowns.content, selectedChapter]);
+    }, [project?.sceneBreakdowns.content]);
 
-    // Handle initialSceneDetails for editing specific scenes from left panel
+    // Handle initial scene details (when editing from left panel)
     useEffect(() => {
-        if (initialSceneDetails && project) {
+        if (initialSceneDetails) {
             setSelectedChapter(initialSceneDetails.chapterTitle);
             setSceneIdentifier(initialSceneDetails.sceneIdentifier);
             
-            // Load the existing scene content
+            // Check if there's an existing scene narrative for this scene
             const existingScene = getSceneNarrative(initialSceneDetails.chapterTitle, initialSceneDetails.sceneIdentifier);
             if (existingScene) {
                 setEditedNarrative(existingScene.content);
                 setGeneratedNarrative(existingScene.content);
                 setIsEditingNarrative(true);
+                // If scenePlan was passed in initialSceneDetails (from breakdown tab)
+                // and no existing plan is loaded or if this is a fresh navigation.
+                if (initialSceneDetails.scenePlan && (!scenePlan || generatedNarrative === '')) setScenePlan(initialSceneDetails.scenePlan);
             }
             
             // Clear the initial scene details after loading
@@ -68,10 +65,9 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
                 setInitialSceneDetails(null);
             }
         }
-    }, [initialSceneDetails, project, getSceneNarrative, setInitialSceneDetails]);
+    }, [initialSceneDetails, getSceneNarrative, setInitialSceneDetails]);
 
     useEffect(() => {
-        // Clear success message after 3 seconds
         if (successMessage) {
             const timer = setTimeout(() => setSuccessMessage(null), 3000);
             return () => clearTimeout(timer);
@@ -79,10 +75,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
     }, [successMessage]);
 
     const proceedWithGeneration = async () => {
-        if (!project || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()) {
-            setError("Please select a chapter, provide a scene identifier, and enter a scene plan.");
-            return;
-        }
+        if (!project) return;
         setIsLoading(true);
         setError(null);
         try {
@@ -93,7 +86,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
                 full_chapter_scene_breakdown: fullChapterBreakdown,
                 approved_worldbuilding_md: project.worldbuilding.content,
                 full_approved_outline_md: project.outline.content,
-                writing_style_notes: writingStyleNotes || undefined
+                writing_style_notes: writingStyleNotes || "Write in an engaging narrative style."
             });
             setGeneratedNarrative(data.scene_narrative_md);
             setEditedNarrative(data.scene_narrative_md);
@@ -105,27 +98,23 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
         }
     };
 
-    const handleGenerateSceneNarrative = () => {
-        if (!project || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()) {
+    const handleGenerateNarrative = () => {
+        if (!selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()) {
             setError("Please select a chapter, provide a scene identifier, and enter a scene plan.");
             return;
         }
-        if (!project.sceneBreakdowns.isApproved) {
-            showPrerequisiteWarning(
-                "The Scene Breakdowns are not yet approved. Generating scene narratives with unapproved breakdowns might lead to rework. Do you want to proceed?",
-                proceedWithGeneration
-            );
-        } else {
-            proceedWithGeneration();
-        }
+        proceedWithGeneration();
     };
 
     const handleSaveSceneToProject = () => {
         if (!project || !selectedChapter || !sceneIdentifier.trim() || !editedNarrative.trim()) {
             setError("Cannot save scene: missing chapter, identifier, or narrative content.");
             return;
+        }        
+        if (isLoading) {
+            setError("Cannot save while another operation is in progress.");
+            return;
         }
-
         const sceneNarrative = {
             content: editedNarrative,
             isApproved: true, // Scenes are considered approved when saved
@@ -154,7 +143,10 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
             setEditedNarrative(existingScene.content);
             setGeneratedNarrative(existingScene.content);
             setIsEditingNarrative(true);
+            setSuccessMessage(`Loaded existing scene: ${selectedChapter} - ${sceneIdentifier}`);
         } else {
+            setEditedNarrative("");
+            setGeneratedNarrative("");
             setError("No existing scene found with that identifier.");
         }
     };
@@ -162,7 +154,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
     if (!project) return <p>Please create or load a project first.</p>;
     if (!project.sceneBreakdowns.content && !isLoading) {
         return <p>Please complete the 'Scene Breakdowns' step before writing scenes.</p>;
-    }
+    }    
 
     const savedScenesCount = project.sceneNarratives.length;
 
@@ -249,8 +241,8 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
                 </div>
 
                 <button 
-                    onClick={handleGenerateSceneNarrative} 
-                    disabled={isLoading || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()}
+                    onClick={handleGenerateNarrative} 
+                    disabled={isLoading || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim() || !project.worldbuilding.content.trim() || !project.outline.content.trim()}
                 >
                     Generate Scene Narrative
                 </button>
@@ -274,7 +266,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
                                 <button onClick={() => setIsEditingNarrative(false)}>
                                     Preview
                                 </button>
-                                <button onClick={handleGenerateSceneNarrative} disabled={isLoading}>
+                                <button onClick={handleGenerateNarrative} disabled={isLoading}>
                                     Regenerate
                                 </button>
                             </div>
@@ -301,12 +293,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({
                     )}
                 </div>
             )}
-
-            {successMessage && (
-                <div style={{ marginTop: '20px', padding: '10px', backgroundColor: 'var(--success-bg, #1a4a1a)', borderRadius: '5px' }}>
-                    <p>{successMessage}</p>
-                </div>
-            )}
+            {successMessage && <p className="success-message">{successMessage}</p>}
         </div>
     );
 };

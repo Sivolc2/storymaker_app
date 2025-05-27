@@ -8,9 +8,9 @@ import SceneBreakdownTab from '../components/systemawriter/SceneBreakdownTab';
 import SceneWritingTab from '../components/systemawriter/SceneWritingTab';
 import FullStoryReviewTab from '../components/systemawriter/FullStoryReviewTab';
 import StorymakerLeftPanel from '../components/systemawriter/StorymakerLeftPanel';
-import PrerequisiteWarningModal from '../components/systemawriter/PrerequisiteWarningModal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { UploadedDocument as UploadedDocumentType, SceneNarrative as SceneNarrativeType } from '../contexts/ProjectContext';
+import DocumentEditor from '../components/systemawriter/DocumentEditor';
 
 import '../styles/Storymaker.css';
 import '../styles/StorymakeTabs.css';
@@ -32,21 +32,18 @@ interface SystemaWriterPageProps {
 }
 
 const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
-    const { project, removeUploadedDocument, addUploadedDocument } = useProject();
+    const { project, removeUploadedDocument, addUploadedDocument, updateUploadedDocumentContent } = useProject();
     const [activeView, setActiveView] = useState<StorymakerView>('project_setup');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
+    
+    const [editingSceneDetails, setEditingSceneDetails] = useState<{chapterTitle: string, sceneIdentifier: string, scenePlan?: string} | null>(null);
+
+    // For Guide 6: Document Editor
+    const [editingDocument, setEditingDocument] = useState<UploadedDocumentType | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Warning Modal State
-    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
-    const [warningMessage, setWarningMessage] = useState('');
-    const [onConfirmWarning, setOnConfirmWarning] = useState<(() => void) | null>(null);
-    
-    const [editingSceneDetails, setEditingSceneDetails] = useState<{chapterTitle: string, sceneIdentifier: string} | null>(null);
-
 
     useEffect(() => {
         if (!project) {
@@ -61,17 +58,20 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
     
     const handleEditArtifact = (artifact: 'concept' | 'outline' | 'worldbuilding' | 'sceneBreakdowns' | UploadedDocumentType | SceneNarrativeType) => {
         if (typeof artifact === 'string') {
-            // Map artifact names to view names
+            // It's a main artifact type
             const viewMap: Record<string, StorymakerView> = {
                 'concept': 'concept',
-                'outline': 'outline', 
+                'outline': 'outline',
                 'worldbuilding': 'worldbuilding',
                 'sceneBreakdowns': 'scene_breakdowns'
             };
             setActiveView(viewMap[artifact] || artifact as StorymakerView);
+            setEditingDocument(null); // Ensure document editor is closed if a main tab is clicked
         } else if ('content' in artifact && 'type' in artifact) { // UploadedDocument
-            // For now, no specific edit view for uploaded docs, could show preview
             console.log("Viewing/editing uploaded document:", artifact.name);
+            setEditingDocument(artifact);
+            setActiveView('project_setup'); // Or keep current tab view and overlay, for now switch to project_setup to show editor
+            // No, better: render editor instead of tab content if editingDocument is set
             // setActiveView(`doc_${artifact.id}`); // If we had a viewer
         } else if ('sceneIdentifier' in artifact) { // SceneNarrative
             setEditingSceneDetails({ chapterTitle: artifact.chapterTitle, sceneIdentifier: artifact.sceneIdentifier });
@@ -115,52 +115,53 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
         });
     };
 
-    const showPrerequisiteWarning = (message: string, onConfirm: () => void) => {
-        setWarningMessage(message);
-        setOnConfirmWarning(() => onConfirm); // Store the confirm action
-        setIsWarningModalOpen(true);
+    // For Guide 5: Scene selection from Breakdown tab
+    const handleSelectSceneForWriting = (chapterTitle: string, sceneIdentifier: string, scenePlan: string) => {
+        setEditingSceneDetails({ chapterTitle, sceneIdentifier, scenePlan }); // Pass scenePlan too
+        setActiveView('scene_writing');
+        setEditingDocument(null); // Close doc editor if open
     };
 
-    const closeWarningModal = () => {
-        setIsWarningModalOpen(false);
-        setWarningMessage('');
-        setOnConfirmWarning(null);
+    const handleSaveEditedDocument = (docId: string, newContent: string) => {
+        updateUploadedDocumentContent(docId, newContent);
+        setEditingDocument(null);
+        setError(null); // Clear any previous errors
+        // Optionally, set a success message here
     };
 
-    const handleConfirmWarning = () => {
-        if (onConfirmWarning) {
-            onConfirmWarning();
-        }
-        closeWarningModal();
+    const handleCancelEditDocument = () => {
+        setEditingDocument(null);
     };
 
     const renderMainContent = () => {
+        // Guide 6: If a document is being edited, show the editor
+        if (editingDocument) {
+            return (
+                <DocumentEditor document={editingDocument} onSave={handleSaveEditedDocument} onCancel={handleCancelEditDocument} />
+            );
+        }
+
         if (!project && activeView !== 'project_setup') {
              return <p>Please set up your project first.</p>;
         }
+
         switch (activeView) {
             case 'project_setup':
                 return <ProjectSetupTab apiUrl={apiUrl} setIsLoading={setIsLoading} setError={setError} onProjectCreated={() => setActiveView('concept')} />;
             case 'concept':
-                return <ConceptTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onConceptApproved={() => { /* User navigates manually */ }} />;
+                return <ConceptTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onConceptApproved={() => {}} />;
             case 'outline':
-                return <OutlineTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onOutlineApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+                return <OutlineTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onOutlineApproved={() => {}} />;
             case 'worldbuilding':
-                return <WorldbuildingTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onWorldbuildingApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+                return <WorldbuildingTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onWorldbuildingApproved={() => {}} />;
             case 'scene_breakdowns':
-                return <SceneBreakdownTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onBreakdownsApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+                return <SceneBreakdownTab apiUrl={apiUrl} isLoading={project?.isLoading || isLoading} setIsLoading={setIsLoading} setError={setError} onBreakdownsApproved={() => {}} onSelectSceneForWriting={handleSelectSceneForWriting} />;
             case 'scene_writing':
-                return <SceneWritingTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} showPrerequisiteWarning={showPrerequisiteWarning} initialSceneDetails={editingSceneDetails} setInitialSceneDetails={setEditingSceneDetails} />;
+                return <SceneWritingTab apiUrl={apiUrl} isLoading={project?.isLoading || isLoading} setIsLoading={setIsLoading} setError={setError} initialSceneDetails={editingSceneDetails} setInitialSceneDetails={setEditingSceneDetails} />;
             case 'full_story_review':
                 return <FullStoryReviewTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} />;
             default:
-                if (activeView.startsWith('doc_')) {
-                    // const docId = activeView.substring(4);
-                    // const doc = project?.uploadedDocuments.find(d => d.id === docId);
-                    // return doc ? <div><h3>{doc.name}</h3><pre>{doc.content}</pre></div> : <p>Document not found.</p>;
-                     return <p>Document viewer/editor not yet implemented. Select an action from the main tabs.</p>;
-                }
-                 return <p>Select an item from the left panel or a tab from above.</p>;
+                return <p>Unknown view: {activeView}</p>;
         }
     };
     
@@ -175,7 +176,6 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
         { label: "6. Review & Export", view: 'full_story_review', prerequisite: p => !!p && (!!p.sceneBreakdowns.content || p.sceneNarratives.length > 0), prereqMessage: "Generate some content first." }
     ];
 
-
     return (
         <div className="storymaker-container page-container">
             <h1>Storymaker</h1>
@@ -183,30 +183,6 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
             {error && <p className="error-message">Error: {error}</p>}
             
             <input type="file" ref={fileInputRef} multiple onChange={handleFileUpload} accept=".txt,.md" style={{ display: 'none' }} />
-
-            <div className="sw-tabs-nav">
-                {navItems.map(item => (
-                    <button
-                        key={item.view}
-                        onClick={() => {
-                            if (item.prerequisite && project && !item.prerequisite(project)) {
-                                showPrerequisiteWarning(
-                                    item.prereqMessage || `Prerequisite for ${item.label} not met.`,
-                                    () => handleSelectView(item.view as StorymakerView)
-                                );
-                            } else if (!project && item.view !== 'project_setup') {
-                                setError("Please create or load a project first.");
-                            }
-                            else {
-                                handleSelectView(item.view as StorymakerView);
-                            }
-                        }}
-                        className={activeView === item.view ? 'active' : ''}
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </div>
 
             <div className="storymaker-page-layout">
                 <div className={`left-panel ${isLeftPanelCollapsed ? 'collapsed' : ''}`}>
@@ -230,16 +206,33 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
                     )}
                 </div>
                 <div className="main-content-area">
-                    {renderMainContent()}
+                    <div className="sw-tabs-nav">
+                        {navItems.map(item => (
+                            <button
+                                key={item.view}
+                                onClick={() => {
+                                    const canProceed = !item.prerequisite || (project && item.prerequisite(project));
+                                    setEditingDocument(null); // Close document editor when changing main tabs
+                                    if (!project && item.view !== 'project_setup') {
+                                        setError("Please create or load a project first.");
+                                    } else if (canProceed) {
+                                        handleSelectView(item.view as StorymakerView);
+                                    } else if (item.prereqMessage) {
+                                        setError(item.prereqMessage); // Show simple error if prerequisite not met
+                                    }
+                                }}
+                                className={activeView === item.view ? 'active' : ''}
+                                disabled={!project && item.view !== 'project_setup'}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="sw-tab-content-wrapper">
+                        {renderMainContent()}
+                    </div>
                 </div>
             </div>
-
-            <PrerequisiteWarningModal
-                isOpen={isWarningModalOpen}
-                message={warningMessage}
-                onConfirm={handleConfirmWarning}
-                onCancel={closeWarningModal}
-            />
         </div>
     );
 };

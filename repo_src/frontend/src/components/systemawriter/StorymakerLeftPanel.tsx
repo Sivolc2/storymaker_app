@@ -29,44 +29,61 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
     const artifactBaseClass = "left-panel-item";
     const activeClass = "active";
 
+    const getArtifactStatus = (artifact: ProjectState['concept'] | ProjectState['outline'] | ProjectState['worldbuilding'] | ProjectState['sceneBreakdowns']) => {
+        if (artifact.isApproved) return '✓';
+        if (project?.isLoading && activeView === artifactTypeToView(artifact)) return '(Generating...)'; // Needs a way to map artifact to view
+        if (artifact.content) return '(Draft)';
+        return '';
+    };
+
+    // Helper to map artifact type to its view string, needed for isLoading check above.
+    // This is a simplified version. A more robust solution might involve passing specific loading states.
+    const artifactTypeToView = (artifact: any): string => {
+        if (artifact === project?.concept) return 'concept';
+        if (artifact === project?.outline) return 'outline';
+        if (artifact === project?.worldbuilding) return 'worldbuilding';
+        if (artifact === project?.sceneBreakdowns) return 'scene_breakdowns';
+        return '';
+    }
+
     return (
         <div className="left-panel">
             <h3>{project.projectName}</h3>
+            {project.isLoading && <span className="global-loading-indicator">(Syncing...)</span>}
             <button 
                 className={`${artifactBaseClass} ${activeView === 'project_setup' ? activeClass : ''}`} 
                 onClick={() => onSelectView('project_setup')}
             >
                 ⚙️ Project Setup
             </button>
-
             <h4>Generated Artifacts</h4>
             <div className="artifact-list">
                 <div 
                     className={`${artifactBaseClass} ${activeView === 'concept' ? activeClass : ''}`}
                     onClick={() => onSelectView('concept')}
                 >
-                    📝 Concept {project.concept.isApproved && '✓'}
+                    📝 Concept {getArtifactStatus(project.concept)}
                     <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact('concept'); }}>Edit</button>
                 </div>
                 <div
                     className={`${artifactBaseClass} ${activeView === 'outline' ? activeClass : ''}`}
                     onClick={() => onSelectView('outline')}
                 >
-                    📖 Outline {project.outline.isApproved && '✓'}
+                    📖 Outline {getArtifactStatus(project.outline)}
                      <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact('outline'); }}>Edit</button>
                 </div>
                 <div
                     className={`${artifactBaseClass} ${activeView === 'worldbuilding' ? activeClass : ''}`}
                     onClick={() => onSelectView('worldbuilding')}
                 >
-                    🌍 Worldbuilding {project.worldbuilding.isApproved && '✓'}
+                    🌍 Worldbuilding {getArtifactStatus(project.worldbuilding)}
                     <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact('worldbuilding'); }}>Edit</button>
                 </div>
                 <div
                     className={`${artifactBaseClass} ${activeView === 'scene_breakdowns' ? activeClass : ''}`}
                     onClick={() => onSelectView('scene_breakdowns')}
                 >
-                    🎬 Scene Breakdowns {project.sceneBreakdowns.isApproved && '✓'}
+                    🎬 Scene Breakdowns {getArtifactStatus(project.sceneBreakdowns)}
                     <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact('sceneBreakdowns'); }}>Edit</button>
                 </div>
             </div>
@@ -78,8 +95,8 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
                     <div key={doc.id} className={`${artifactBaseClass} ${activeView === `doc_${doc.id}` ? activeClass : ''}`}>
                         <span>📄 {doc.name}</span>
                         <div>
-                            {/* <button className="edit-btn-small" onClick={() => onEditArtifact(doc)}>View/Edit</button> */}
-                            <button className="remove-btn-small" onClick={() => onRemoveDocument(doc.id)}>Remove</button>
+                            <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact(doc); }}>View/Edit</button>
+                            <button className="remove-btn-small" onClick={(e) => { e.stopPropagation(); onRemoveDocument(doc.id); }}>Remove</button>
                         </div>
                     </div>
                 ))}

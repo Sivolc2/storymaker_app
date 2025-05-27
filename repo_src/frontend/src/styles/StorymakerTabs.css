@@ -1,0 +1,72 @@
+.uploaded-docs-list li:hover .remove-doc-btn {
+    opacity: 1;
+}
+
+.remove-doc-btn {
+    color: var(--error-text-color, #ff6b6b);
+    cursor: pointer;
+}
+
+.parsed-scene-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.parsed-scene-item {
+    background-color: var(--input-bg-color, #3a3a3a);
+    border: 1px solid var(--border-color, #444);
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+.parsed-scene-item strong {
+    color: var(--accent-color, #64cfff);
+}
+
+.parsed-scene-item p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: var(--text-color-muted, #ccc);
+}
+
+.button-small {
+    padding: 5px 10px !important;
+    font-size: 0.9em !important;
+    margin-top: 8px !important;
+}
+
+.button-write-scene {
+    background-color: var(--accent-color-secondary, #4CAF50) !important;
+    color: white !important;
+}
+.button-write-scene:hover {
+    background-color: var(--accent-color-secondary-hover, #45a049) !important;
+}
+
+@media (prefers-color-scheme: light) {
+    .sw-tabs-nav { --border-color: #ddd; }
+    .sw-tabs-nav button { --text-color-muted: #777; }
+    .sw-tabs-nav button:hover { --hover-bg-color: #f0f0f0; }
+    .sw-tabs-nav button.active { --accent-color: #007bff; }
+
+    .step-card { --card-bg-color: #fff; --border-color: #ddd; }
+    .action-buttons button { --button-primary-bg: #007bff; --button-primary-text: #fff; }
+    .action-buttons button:hover { --button-primary-bg: #0056b3; }
+
+    .uploaded-docs-list li { --input-bg-color: #f1f1f1; }
+    .remove-doc-btn { --error-text-color: #dc3545 !important; }
+
+    .parsed-scene-item {
+        --input-bg-color: #f8f9fa;
+        --border-color: #e0e0e0;
+        --accent-color: #007bff;
+        --text-color-muted: #555;
+    }
+    .button-write-scene {
+        --accent-color-secondary: #28a745 !important;
+    }
+    .button-write-scene:hover {
+        --accent-color-secondary-hover: #218838 !important;
+    }
+} 
