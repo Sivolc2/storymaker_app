@@ -142,6 +142,19 @@ pnpm diagrams:generate
 
 The project uses GitHub Actions for continuous integration and deployment.
 
+## 📖 SystemaWriter - AI-Assisted Narrative Generation (v0.1)
+
+This project includes **SystemaWriter**, an AI-powered system that collaborates with a user to transform initial ideas and contextual information into well-structured short stories.
+
+**To use SystemaWriter:**
+1. Navigate to the SystemaWriter page in the frontend application.
+2. Follow the on-screen steps to input your story concept, review AI-generated outlines, worldbuilding details, scene breakdowns, and finally, scene narratives.
+3. For detailed input guidelines, refer to [docs/systemawriter_usage.md](docs/systemawriter_usage.md).
+
+**Setup Requirements:**
+- Add your OpenRouter API key to the environment variables (see `example_env_file.sh`)
+- The system uses OpenRouter for LLM access, supporting various models including Claude 3.5 Sonnet
+
 ## 📄 License
 
 ISC

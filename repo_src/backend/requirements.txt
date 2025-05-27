@@ -3,4 +3,6 @@ uvicorn[standard]
 sqlalchemy
 pydantic
 python-dotenv
-psycopg2-binary # Keep if you plan to support PostgreSQL, otherwise remove for pure SQLite 
+psycopg2-binary # Keep if you plan to support PostgreSQL, otherwise remove for pure SQLite
+httpx # For OpenRouter API calls
+markdown # For processing markdown content 

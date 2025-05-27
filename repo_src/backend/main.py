@@ -32,6 +32,7 @@ else:
 from repo_src.backend.database.setup import init_db
 from repo_src.backend.database import models, connection # For example endpoints
 from repo_src.backend.functions.items import router as items_router # Import the items router
+from repo_src.backend.routers.systemawriter_router import router as systemawriter_router # Import the SystemaWriter router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -58,6 +59,8 @@ app.add_middleware(
 
 # Include the items router
 app.include_router(items_router)
+# Include the SystemaWriter router
+app.include_router(systemawriter_router, prefix="/api/systemawriter", tags=["systemawriter"])
 
 @app.get("/")
 async def read_root():
@@ -73,6 +76,10 @@ async def read_hello():
 # You would typically put these in separate router files (e.g., in an `api` or `routers` directory)
 # and include them in the main app.
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the storymaker-server script."""
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", "8000")), log_level=os.getenv("LOG_LEVEL", "info").lower())
+
+if __name__ == "__main__":
+    main()
