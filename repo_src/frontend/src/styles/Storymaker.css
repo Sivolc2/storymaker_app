@@ -1,49 +1,54 @@
 .storymaker-container {
-    /* Styles specific to Storymaker page can go here */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    width: 100%; /* Takes full width from StorymakerLayout */
+    height: 100%; /* Takes full height */
+    display: flex;
+    flex-direction: column;
 }
 
 .step-card {
-    background-color: var(--card-bg-color, #2a2a2a);
-    border: 1px solid var(--border-color, #444);
-    border-radius: 8px;
+    background-color: var(--bg-content-area); /* Use the new content area background */
+    border: 1px solid var(--border-color-soft);
+    border-radius: 15px; /* Organic shape */
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--card-shadow);
+    color: var(--text-primary);
 }
 
 .step-card h2 {
-    color: var(--text-color, #e0e0e0);
+    color: var(--text-headings);
     margin-bottom: 10px;
-    border-bottom: 2px solid var(--accent-color, #64cfff);
+    border-bottom: 1px solid var(--border-color-strong);
     padding-bottom: 5px;
+    font-style: italic; /* Cormorant Garamond can look good italicized for titles */
 }
 
 .step-card p {
-    color: var(--text-color-muted, #b0b0b0);
+    color: var(--text-primary);
     margin-bottom: 15px;
+    font-size: 1.1em; /* EB Garamond is readable */
 }
 
 .storymaker-container textarea,
 .storymaker-container input[type="text"] {
     width: 100%;
     padding: 12px;
-    border: 1px solid var(--border-color, #444);
-    border-radius: 4px;
-    background-color: var(--input-bg-color, #3a3a3a);
-    color: var(--text-color, #e0e0e0);
-    font-family: inherit;
+    border: 1px solid var(--input-border);
+    border-radius: 10px; /* Organic shape */
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    font-family: var(--body-font);
     font-size: 14px;
     resize: vertical;
+    box-sizing: border-box; /* ensure padding doesn't break layout */
 }
 
 .storymaker-container label {
     display: block;
     margin-bottom: 5px;
-    color: var(--text-color, #e0e0e0);
-    font-weight: 500;
+    color: var(--text-secondary);
+    font-weight: 700; /* Garamond can be thin, bold helps labels */
+    font-family: var(--body-font);
 }
 
 .storymaker-container button {
@@ -77,62 +82,75 @@
 .generated-content-preview {
     margin-top: 20px;
     padding: 15px;
-    background-color: var(--preview-bg-color, #282828);
-    border-radius: 4px;
-    border: 1px solid var(--preview-border-color, #404040);
+    background-color: var(--bg-content-area); /* Similar to step-card but can be distinct */
+    border-radius: 10px; /* Organic shape */
+    border: 1px solid var(--border-color-soft);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2); /* Inner depth */
 }
 
 .generated-content-preview h3 {
     margin-top: 0;
-    color: var(--preview-heading-color, #a0dfff);
+    color: var(--text-accent);
+}
+
+.markdown-content { /* Class for ReactMarkdown output container */
+    font-family: var(--body-font);
+    line-height: 1.7;
+    color: var(--text-primary);
+}
+
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+    font-family: var(--title-font);
+    color: var(--text-headings);
+}
+
+.markdown-content p {
+    font-family: var(--body-font);
+    color: var(--text-primary);
+    font-size: 1.1em;
 }
 
 .chapter-breakdown {
     margin-top: 20px;
     padding: 20px;
-    background-color: var(--chapter-bg-color, #333333);
-    border-radius: 6px;
-    border: 1px solid var(--chapter-border-color, #555);
+    background-color: var(--input-bg); /* Subtle variation */
+    border-radius: 10px; /* Organic */
+    border: 1px solid var(--border-color-soft);
 }
 
 .chapter-breakdown h3 {
-    color: var(--preview-heading-color, #a0dfff);
+    color: var(--text-accent);
     margin-top: 0;
     margin-bottom: 15px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--chapter-border-color, #555);
+    border-bottom: 1px solid var(--border-color-soft);
 }
 
 .chapter-breakdown button {
     margin-top: 15px;
-    background-color: var(--chapter-button-bg, #4a9eff);
-    color: var(--chapter-button-text, #ffffff);
-}
-
-.chapter-breakdown button:hover:not(:disabled) {
-    background-color: var(--chapter-button-hover-bg, #6bb3ff);
 }
 
 .error-message {
-    color: var(--error-text-color, #ff6b6b);
-    background-color: var(--error-bg-color, #442222);
+    color: #FFB6C1; /* Light Pink for error text */
+    background-color: rgba(139, 0, 0, 0.3); /* Dark Red transparent */
     padding: 10px;
-    border-radius: 4px;
+    border-radius: 8px; /* Organic */
     margin-bottom: 15px;
-    border: 1px solid var(--error-border-color, #663333);
+    border: 1px solid #A52A2A; /* Brownish Red */
+    font-family: var(--body-font);
 }
 
 /* Scene narrative editing specific styles */
 .step-card textarea#editedSceneNarrative {
     min-height: 400px;
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: var(--body-font); /* EB Garamond for prose */
     line-height: 1.6;
     font-size: 1.1em;
 }
 
 .step-card textarea#scenePlanInput {
-    background-color: var(--scene-plan-bg, #3a4a3a);
-    border-color: var(--scene-plan-border, #5a7a5a);
+    background-color: rgba(155, 134, 189, 0.08); /* Slightly more prominent input bg */
+    border-color: var(--lavender-dusty);
 }
 
 /* Button grouping for better UX */
@@ -147,37 +165,33 @@
     margin: 0;
 }
 
-/* NEW: Navigation card styles */
 .navigation-card {
     text-align: center;
     padding: 20px;
-    margin-top: 30px;
-    background-color: var(--card-bg-color-alt, #383838);
-    border: 2px solid var(--accent-color, #64cfff);
-    border-radius: 8px;
+    margin: 30px auto; /* Center it if it's standalone */
+    background-color: var(--midnight-blue);
+    border: 1px solid var(--lavender-dusty);
+    border-radius: 15px; /* Organic */
+    box-shadow: 0 0 20px var(--moonlight-glow-color); /* Moonlight glow */
 }
 
 .navigation-button {
-    font-size: 1.2em !important;
-    padding: 15px 30px !important;
-    background-color: var(--accent-color, #64cfff) !important;
-    color: var(--button-primary-text, #1a1a1a) !important;
-    margin: 0 !important;
+    font-size: 1.2em; /* Ensure this is applied via theme.css or specific enough */
+    padding: 15px 30px;
+    /* Button base style from theme.css */
 }
 
 .navigation-button:hover:not(:disabled) {
-    background-color: var(--accent-color-hover, #88dfff) !important;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .saved-scenes-info {
     margin-top: 10px;
-    color: var(--text-color-muted, #b0b0b0);
+    color: var(--text-secondary);
     font-style: italic;
 }
 
-/* NEW: Final review styles */
 .final-review-actions {
     display: flex;
     gap: 15px;
@@ -187,180 +201,92 @@
 }
 
 .export-button {
-    background-color: var(--export-button-bg, #28a745) !important;
-    color: var(--export-button-text, #ffffff) !important;
-    font-size: 1.1em !important;
-    padding: 12px 25px !important;
+    background-color: var(--lavender-dusty); /* Theme accent for primary actions */
+    color: var(--midnight-blue);
+    font-size: 1.1em;
+    padding: 12px 25px;
+    /* Base button styles from theme.css handle other properties */
 }
 
 .export-button:hover:not(:disabled) {
-    background-color: var(--export-button-hover-bg, #218838) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: var(--silver-moonlight);
+    box-shadow: var(--button-glow);
 }
 
 .assembled-story-preview {
     margin-top: 25px;
-    border-top: 2px solid var(--border-color, #444);
+    border-top: 1px solid var(--border-color-soft);
     padding-top: 20px;
-    background-color: var(--preview-bg-color-darker, #1a1a1a);
-    color: var(--text-color-light, #f0f0f0);
-    border-radius: 8px;
+    background-color: var(--bg-content-area); /* Content area bg */
+    color: var(--text-primary);
+    border-radius: 15px; /* Organic */
     padding: 25px;
     max-height: 70vh;
     overflow-y: auto;
-    border: 1px solid var(--preview-border-color, #404040);
+    border: 1px solid var(--border-color-soft);
+    box-shadow: var(--card-shadow); /* Consistent card shadow */
 }
 
 .assembled-story-preview h1,
 .assembled-story-preview h2,
 .assembled-story-preview h3 {
-    color: var(--heading-color-light, #7cc5ff);
+    color: var(--text-headings);
+    font-family: var(--title-font);
 }
 
 .assembled-story-preview h3 {
     margin-top: 0;
-    color: var(--preview-heading-color, #a0dfff);
-    border-bottom: 1px solid var(--border-color, #444);
+    color: var(--text-accent);
+    border-bottom: 1px solid var(--border-color-soft);
     padding-bottom: 10px;
 }
 
 .assembled-story-preview hr {
-    border-color: var(--border-color-light, #555);
+    border-color: var(--border-color-soft);
     margin: 20px 0;
 }
 
 .assembled-story-preview p {
     line-height: 1.7;
     margin-bottom: 15px;
-}
-
-.no-scenes-message {
-    text-align: center;
-    padding: 40px 20px;
-    background-color: var(--warning-bg-color, #3a3a2a);
-    border-radius: 8px;
-    border: 1px solid var(--warning-border-color, #666633);
-    color: var(--warning-text-color, #ffeb3b);
-}
-
-.no-scenes-message p {
-    margin: 0;
     font-size: 1.1em;
-}
-
-/* For light mode adjustments if your global styles don't cover these variables */
-@media (prefers-color-scheme: light) {
-    .step-card {
-        --card-bg-color: #ffffff;
-        --border-color: #e0e0e0;
-        --text-color: #333333;
-        --text-color-muted: #666666;
-        --input-bg-color: #f8f9fa;
-        --button-primary-bg: #007bff;
-        --button-primary-text: #ffffff;
-        --hover-bg-color: #f0f0f0;
-        --accent-color: #007bff;
-        --success-color: #28a745;
-        --error-color: #dc3545;
-        --warning-color: #ffc107;
-        --info-color: #17a2b8;
-        --success-bg: #d4edda;
-        --error-bg: #f8d7da;
-        --warning-bg: #fff3cd;
-        --info-bg: #d1ecf1;
-        --success-border-color: #c3e6cb;
-        --error-border-color: #f5c6cb;
-        --warning-border-color: #ffeaa7;
-        --warning-text-color: #856404;
-    }
-    .storymaker-container textarea,
-    .storymaker-container input[type="text"] {
-        --input-border-color: #ccc;
-        --input-bg-color: #fff;
-        --text-color: #213547;
-    }
-    .storymaker-container button {
-        --button-primary-bg: #007bff;
-        --button-primary-text: #fff;
-    }
-    .storymaker-container button:hover:not(:disabled) {
-        --button-primary-hover-bg: #0056b3;
-    }
-     .storymaker-container button:disabled {
-        --button-disabled-bg: #ccc;
-    }
-    .generated-content-preview {
-        --preview-bg-color: #efefef;
-        --preview-border-color: #d0d0d0;
-        --preview-heading-color: #0056b3;
-    }
-    .chapter-breakdown {
-        --chapter-bg-color: #f5f5f5;
-        --chapter-border-color: #ddd;
-        --chapter-button-bg: #007bff;
-        --chapter-button-text: #ffffff;
-        --chapter-button-hover-bg: #0056b3;
-    }
-    .error-message {
-        --error-text-color: #721c24;
-        --error-bg-color: #f8d7da;
-        --error-border-color: #f5c6cb;
-    }
-    .storymaker-container textarea#scenePlanInput {
-        --scene-plan-bg: #f0f8f0;
-        --scene-plan-border: #90c090;
-    }
-    .assembled-story-preview {
-        --preview-bg-color-darker: #f8f9fa;
-        --text-color-light: #212529;
-        --heading-color-light: #0056b3;
-        --border-color-light: #ced4da;
-    }
-    .no-scenes-message {
-        --warning-bg-color: #fff3cd;
-        --warning-border-color: #ffeaa7;
-        --warning-text-color: #856404;
-    }
-    .export-button {
-        --export-button-bg: #28a745;
-        --export-button-text: #ffffff;
-        --export-button-hover-bg: #218838;
-    }
-    .saved-scenes-info {
-        --text-color-muted: #6c757d;
-    }
-    .document-editor-card {
-        --accent-color: #007bff;
-    }
-    .document-editor-card textarea {
-        --input-bg-color-darker: #f8f9fa;
-        --border-color-light: #ced4da;
-    }
-    .button-secondary { --button-secondary-bg: #6c757d !important; --button-secondary-text: #fff !important; }
+    font-family: var(--body-font);
 }
 
 .global-loading-indicator {
+    color: var(--text-accent);
     font-style: italic;
-    color: var(--accent-color, #64cfff);
     font-size: 0.9em;
 }
 
 .document-editor-card {
-    /* Styles specific to the document editor */
-    border-left: 5px solid var(--accent-color, #64cfff);
+    border-left: 5px solid var(--lavender-dusty); /* Theme accent */
+    background-color: var(--bg-content-area); /* Use content area background */
 }
 
 .document-editor-card h2 {
-    color: var(--accent-color, #64cfff);
+    color: var(--text-accent);
 }
 
 .document-editor-card textarea {
-    background-color: var(--input-bg-color-darker, #1e1e1e); /* Slightly darker for focus */
-    border: 1px solid var(--border-color-light, #555);
+    background-color: var(--input-bg); /* Consistent input styling */
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+    font-family: var(--body-font); /* Ensure consistent font */
 }
 
 .button-secondary { /* For cancel buttons or less prominent actions */
-    background-color: var(--button-secondary-bg, #555) !important;
-    color: var(--button-secondary-text, #e0e0e0) !important;
+    background-color: var(--midnight-blue) !important; /* Darker, less prominent */
+    color: var(--silver-moonlight) !important;
+    border: 1px solid var(--border-color-soft) !important;
+}
+
+.button-secondary:hover:not(:disabled) {
+    background-color: var(--plum-deep) !important;
+    box-shadow: 0 0 8px var(--moonlight-glow-color) !important;
+}
+
+.storymaker-container h1 {
+    text-align: center; /* Center the main title */
+    margin-bottom: 20px;
 } 

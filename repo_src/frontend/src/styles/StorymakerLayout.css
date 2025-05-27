@@ -1,7 +1,7 @@
 .storymaker-page-layout {
     display: flex;
     height: calc(100vh - 120px); /* Adjust based on header/footer height */
-    width: 100%;
+    width: 100vw; /* Full viewport width */
     max-width: none; /* Override App.css max-width for this page */
     padding: 0; /* Remove padding from App.css */
 }
@@ -9,99 +9,110 @@
 .left-panel {
     width: 280px;
     min-width: 220px;
-    background-color: var(--card-bg-color, #2f2f2f);
+    background-color: var(--bg-secondary); /* Midnight Blue */
     padding: 15px;
     overflow-y: auto;
-    border-right: 1px solid var(--border-color, #444);
+    border-right: 1px solid var(--border-color-soft);
     transition: width 0.3s ease;
+    font-family: var(--body-font);
 }
 
 .left-panel.collapsed {
     width: 50px;
     padding: 15px 5px;
+    overflow: hidden; /* Hide content when collapsed */
 }
 
 .left-panel h3 {
-    color: var(--accent-color, #64cfff);
+    color: var(--text-accent);
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.2em;
+    font-family: var(--title-font);
 }
 .left-panel h4 {
-    color: var(--text-color-muted, #b0b0b0);
+    color: var(--text-secondary);
     margin-top: 15px;
     margin-bottom: 8px;
     font-size: 0.9em;
     text-transform: uppercase;
-    border-bottom: 1px solid var(--border-color-light, #555);
+    border-bottom: 1px solid var(--border-color-soft);
     padding-bottom: 5px;
+    font-family: var(--title-font);
+    font-weight: 700;
 }
 
 .global-loading-indicator {
     font-style: italic;
-    color: var(--accent-color, #64cfff);
+    color: var(--text-accent);
     font-size: 0.9em;
 }
 
 .left-panel-item {
-    padding: 8px 10px;
+    padding: 10px 12px; /* Slightly more padding */
     margin-bottom: 5px;
-    border-radius: 4px;
+    border-radius: 8px; /* More organic */
     cursor: pointer;
-    color: var(--text-color, #e0e0e0);
-    transition: background-color 0.2s ease;
+    color: var(--text-primary);
+    transition: var(--transition-soft);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-size: 0.95em;
+    border: 1px solid transparent; /* For hover/active glow */
 }
 
-.left-panel-item:hover {
-    background-color: var(--hover-bg-color, #3a3a3a);
+.left-panel-item:hover:not(.active) {
+    background-color: var(--plum-deep); /* Plum for hover */
+    color: var(--silver-moonlight);
+    border-color: var(--border-color-soft);
 }
 
 .left-panel-item.active {
-    background-color: var(--accent-color, #64cfff);
-    color: var(--button-primary-text, #000);
-    font-weight: bold;
-}
-.left-panel-item.active .edit-btn-small,
-.left-panel-item.active .remove-btn-small {
-    color: var(--button-primary-text, #000);
-    border-color: var(--button-primary-text, #000);
+    background-color: var(--lavender-dusty); /* Dusty Lavender for active */
+    color: var(--midnight-blue); /* Dark text on light active bg */
+    font-weight: 700;
+    box-shadow: 0 0 10px var(--accent-glow-color);
 }
 
+.left-panel-item.active .edit-btn-small,
+.left-panel-item.active .remove-btn-small {
+    color: var(--midnight-blue); /* Dark text on light active bg */
+    border-color: var(--midnight-blue);
+}
 
 .edit-btn-small, .remove-btn-small, .add-doc-btn-small {
     background: none;
-    border: 1px solid var(--text-color-muted, #aaa);
-    color: var(--text-color-muted, #aaa);
+    border: 1px solid var(--text-secondary);
+    color: var(--text-secondary);
     padding: 3px 6px;
     font-size: 0.8em;
-    border-radius: 3px;
+    border-radius: 5px; /* Organic */
     cursor: pointer;
     margin-left: 5px;
+    transition: var(--transition-soft);
 }
 .edit-btn-small:hover, .remove-btn-small:hover, .add-doc-btn-small:hover {
-    background-color: var(--hover-bg-color, #3a3a3a);
-    color: var(--text-color, #e0e0e0);
+    background-color: var(--plum-deep);
+    color: var(--silver-moonlight);
+    border-color: var(--lavender-dusty);
 }
 .add-doc-btn-small {
     display: block;
     width: 100%;
     margin-bottom: 10px;
     text-align: center;
-    background-color: var(--button-secondary-bg, #555);
-    color: var(--text-color, #e0e0e0);
+    background-color: var(--input-bg);
+    color: var(--text-accent);
+    border-color: var(--text-accent);
 }
-
 
 .artifact-list, .document-list {
     margin-bottom: 15px;
 }
 .empty-list-text {
     font-size: 0.85em;
-    color: var(--text-color-disabled, #777);
+    color: var(--text-secondary);
     font-style: italic;
     padding: 5px 0;
 }
@@ -109,86 +120,51 @@
 .review-button {
     margin-top: 20px;
     width: 100%;
-    background-color: var(--success-bg, #1a4a1a);
-    border: 1px solid var(--success-color, #4CAF50);
-    color: var(--success-color, #4CAF50);
+    background-color: var(--lavender-dusty); /* Theme accent */
+    color: var(--midnight-blue);
+    border: 1px solid transparent;
 }
 .review-button:hover {
-    background-color: var(--success-color, #4CAF50);
-    color: white;
+    background-color: var(--silver-moonlight);
+    box-shadow: var(--button-glow);
 }
-
 
 .main-content-area {
     flex-grow: 1;
-    /* Padding will be managed by individual tab content or specific containers within main-content-area */
-    /* Remove direct padding here to allow tabs-nav to span full width if desired */
-    padding: 0; 
     overflow-y: auto;
-    display: flex; /* Allow tabs nav and tab content to stack vertically */
-    flex-direction: column; /* Stack nav on top of content */
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-primary); /* Plum deep for the main area */
 }
 
 .collapse-btn-container {
     text-align: right;
     margin-bottom: 10px;
+    display: flex; /* To ensure it's visible even if panel is narrow */
+    justify-content: flex-end;
 }
 
 .collapse-btn {
-    background: var(--button-secondary-bg, #454545);
-    color: var(--text-color, #e0e0e0);
-    border: 1px solid var(--border-color, #555);
+    background: var(--input-bg);
+    color: var(--text-accent);
+    border: 1px solid var(--border-color-soft);
     padding: 5px 10px;
     cursor: pointer;
+    border-radius: 5px 0 0 5px; /* Rounded on one side */
 }
 .collapse-btn:hover {
-    background: var(--hover-bg-color, #555);
+    background: var(--plum-deep);
+    color: var(--silver-moonlight);
 }
-/* Styles for the active tab content area, if needed for consistent padding */
-.sw-tab-content-wrapper { /* Add this class to the div wrapping {renderMainContent()} */
+
+.sw-tab-content-wrapper { 
     padding: 20px;
     flex-grow: 1;
     overflow-y: auto;
-}
-
-
-/* Light mode adjustments */
-@media (prefers-color-scheme: light) {
-    .left-panel {
-        background-color: #f8f9fa;
-        border-right-color: #dee2e6;
-    }
-    .left-panel h3 { color: #007bff; }
-    .left-panel h4 { color: #6c757d; --border-color-light: #ccc; }
-    .left-panel-item { color: #343a40; }
-    .left-panel-item:hover { background-color: #e9ecef; }
-    .left-panel-item.active { background-color: #007bff; color: #fff; }
-    .left-panel-item.active .edit-btn-small,
-    .left-panel-item.active .remove-btn-small {
-        color: #fff;
-        border-color: #fff;
-    }
-
-    .edit-btn-small, .remove-btn-small, .add-doc-btn-small {
-        border-color: #adb5bd;
-        color: #495057;
-    }
-    .edit-btn-small:hover, .remove-btn-small:hover, .add-doc-btn-small:hover {
-        background-color: #e9ecef;
-        color: #212529;
-    }
-    .add-doc-btn-small { background-color: #e9ecef; color: #212529; }
-    .empty-list-text { color: #6c757d; }
-    
-    .review-button {
-        background-color: #d4edda;
-        border-color: #28a745;
-        color: #28a745;
-    }
-    .review-button:hover {
-        background-color: #28a745;
-        color: white;
-    }
-    .collapse-btn { background: #f0f0f0; color: #333; border-color: #ccc; }
-    .collapse-btn:hover { background: #e0e0e0; }
+    background-color: var(--bg-primary); /* Same as main content area for seamless look */
+    /* Apply parchment texture here */
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(200, 184, 219, 0.02) 1px, transparent 0),
+        radial-gradient(circle at 10px 10px, rgba(200, 184, 219, 0.01) 1px, transparent 0);
+    background-size: 20px 20px;
 } 
