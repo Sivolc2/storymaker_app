@@ -1,0 +1,320 @@
+.storymaker-container {
+    /* Styles specific to Storymaker page can go here */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.step-card {
+    background-color: var(--card-bg-color, #2a2a2a);
+    border: 1px solid var(--border-color, #444);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.step-card h2 {
+    color: var(--text-color, #e0e0e0);
+    margin-bottom: 10px;
+    border-bottom: 2px solid var(--accent-color, #64cfff);
+    padding-bottom: 5px;
+}
+
+.step-card p {
+    color: var(--text-color-muted, #b0b0b0);
+    margin-bottom: 15px;
+}
+
+.storymaker-container textarea,
+.storymaker-container input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color, #444);
+    border-radius: 4px;
+    background-color: var(--input-bg-color, #3a3a3a);
+    color: var(--text-color, #e0e0e0);
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+}
+
+.storymaker-container label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--text-color, #e0e0e0);
+    font-weight: 500;
+}
+
+.storymaker-container button {
+    background-color: var(--button-primary-bg, #64cfff);
+    color: var(--button-primary-text, #000);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.storymaker-container button:hover:not(:disabled) {
+    background-color: var(--button-primary-hover, #52b8e6);
+}
+
+.storymaker-container button:disabled {
+    background-color: var(--button-disabled-bg, #555);
+    color: var(--button-disabled-text, #888);
+    cursor: not-allowed;
+}
+
+.storymaker-container button + button { /* Add space between adjacent buttons */
+    margin-left: 0;
+}
+
+.generated-content-preview {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--preview-bg-color, #282828);
+    border-radius: 4px;
+    border: 1px solid var(--preview-border-color, #404040);
+}
+
+.generated-content-preview h3 {
+    margin-top: 0;
+    color: var(--preview-heading-color, #a0dfff);
+}
+
+.chapter-breakdown {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: var(--chapter-bg-color, #333333);
+    border-radius: 6px;
+    border: 1px solid var(--chapter-border-color, #555);
+}
+
+.chapter-breakdown h3 {
+    color: var(--preview-heading-color, #a0dfff);
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--chapter-border-color, #555);
+}
+
+.chapter-breakdown button {
+    margin-top: 15px;
+    background-color: var(--chapter-button-bg, #4a9eff);
+    color: var(--chapter-button-text, #ffffff);
+}
+
+.chapter-breakdown button:hover:not(:disabled) {
+    background-color: var(--chapter-button-hover-bg, #6bb3ff);
+}
+
+.error-message {
+    color: var(--error-text-color, #ff6b6b);
+    background-color: var(--error-bg-color, #442222);
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    border: 1px solid var(--error-border-color, #663333);
+}
+
+/* Scene narrative editing specific styles */
+.step-card textarea#editedSceneNarrative {
+    min-height: 400px;
+    font-family: 'Georgia', 'Times New Roman', serif;
+    line-height: 1.6;
+    font-size: 1.1em;
+}
+
+.step-card textarea#scenePlanInput {
+    background-color: var(--scene-plan-bg, #3a4a3a);
+    border-color: var(--scene-plan-border, #5a7a5a);
+}
+
+/* Button grouping for better UX */
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.button-group button {
+    margin: 0;
+}
+
+/* NEW: Navigation card styles */
+.navigation-card {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    background-color: var(--card-bg-color-alt, #383838);
+    border: 2px solid var(--accent-color, #64cfff);
+    border-radius: 8px;
+}
+
+.navigation-button {
+    font-size: 1.2em !important;
+    padding: 15px 30px !important;
+    background-color: var(--accent-color, #64cfff) !important;
+    color: var(--button-primary-text, #1a1a1a) !important;
+    margin: 0 !important;
+}
+
+.navigation-button:hover:not(:disabled) {
+    background-color: var(--accent-color-hover, #88dfff) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.saved-scenes-info {
+    margin-top: 10px;
+    color: var(--text-color-muted, #b0b0b0);
+    font-style: italic;
+}
+
+/* NEW: Final review styles */
+.final-review-actions {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.export-button {
+    background-color: var(--export-button-bg, #28a745) !important;
+    color: var(--export-button-text, #ffffff) !important;
+    font-size: 1.1em !important;
+    padding: 12px 25px !important;
+}
+
+.export-button:hover:not(:disabled) {
+    background-color: var(--export-button-hover-bg, #218838) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.assembled-story-preview {
+    margin-top: 25px;
+    border-top: 2px solid var(--border-color, #444);
+    padding-top: 20px;
+    background-color: var(--preview-bg-color-darker, #1a1a1a);
+    color: var(--text-color-light, #f0f0f0);
+    border-radius: 8px;
+    padding: 25px;
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid var(--preview-border-color, #404040);
+}
+
+.assembled-story-preview h1,
+.assembled-story-preview h2,
+.assembled-story-preview h3 {
+    color: var(--heading-color-light, #7cc5ff);
+}
+
+.assembled-story-preview h3 {
+    margin-top: 0;
+    color: var(--preview-heading-color, #a0dfff);
+    border-bottom: 1px solid var(--border-color, #444);
+    padding-bottom: 10px;
+}
+
+.assembled-story-preview hr {
+    border-color: var(--border-color-light, #555);
+    margin: 20px 0;
+}
+
+.assembled-story-preview p {
+    line-height: 1.7;
+    margin-bottom: 15px;
+}
+
+.no-scenes-message {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: var(--warning-bg-color, #3a3a2a);
+    border-radius: 8px;
+    border: 1px solid var(--warning-border-color, #666633);
+    color: var(--warning-text-color, #ffeb3b);
+}
+
+.no-scenes-message p {
+    margin: 0;
+    font-size: 1.1em;
+}
+
+/* For light mode adjustments if your global styles don't cover these variables */
+@media (prefers-color-scheme: light) {
+    .step-card {
+        --card-bg-color: #f9f9f9;
+        --heading-color: #007bff;
+        --subheading-color: #0056b3;
+        --border-color: #ddd;
+        --label-color: #333;
+        --card-bg-color-alt: #e9ecef;
+        --accent-color: #007bff;
+        --accent-color-hover: #0056b3;
+    }
+    .storymaker-container textarea,
+    .storymaker-container input[type="text"] {
+        --input-border-color: #ccc;
+        --input-bg-color: #fff;
+        --text-color: #213547;
+    }
+    .storymaker-container button {
+        --button-primary-bg: #007bff;
+        --button-primary-text: #fff;
+    }
+    .storymaker-container button:hover:not(:disabled) {
+        --button-primary-hover-bg: #0056b3;
+    }
+     .storymaker-container button:disabled {
+        --button-disabled-bg: #ccc;
+    }
+    .generated-content-preview {
+        --preview-bg-color: #efefef;
+        --preview-border-color: #d0d0d0;
+        --preview-heading-color: #0056b3;
+    }
+    .chapter-breakdown {
+        --chapter-bg-color: #f5f5f5;
+        --chapter-border-color: #ddd;
+        --chapter-button-bg: #007bff;
+        --chapter-button-text: #ffffff;
+        --chapter-button-hover-bg: #0056b3;
+    }
+    .error-message {
+        --error-text-color: #721c24;
+        --error-bg-color: #f8d7da;
+        --error-border-color: #f5c6cb;
+    }
+    .storymaker-container textarea#scenePlanInput {
+        --scene-plan-bg: #f0f8f0;
+        --scene-plan-border: #90c090;
+    }
+    .assembled-story-preview {
+        --preview-bg-color-darker: #f8f9fa;
+        --text-color-light: #212529;
+        --heading-color-light: #0056b3;
+        --border-color-light: #ced4da;
+    }
+    .no-scenes-message {
+        --warning-bg-color: #fff3cd;
+        --warning-border-color: #ffeaa7;
+        --warning-text-color: #856404;
+    }
+    .export-button {
+        --export-button-bg: #28a745;
+        --export-button-text: #ffffff;
+        --export-button-hover-bg: #218838;
+    }
+    .saved-scenes-info {
+        --text-color-muted: #6c757d;
+    }
+} 

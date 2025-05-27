@@ -1,10 +1,10 @@
-# SystemaWriter Usage Guide (v0.1)
+# Storymaker Usage Guide (v0.1)
 
-SystemaWriter is an AI-assisted tool to help you generate structured narratives from your ideas. This guide explains how to use the v0.1 features.
+Storymaker is an AI-assisted tool to help you generate structured narratives from your ideas. This guide explains how to use the v0.1 features.
 
 ## How to Use
 
-1.  **Navigate to SystemaWriter:** In the application, find and open the "SystemaWriter" page.
+1.  **Navigate to Storymaker:** In the application, find and open the "Storymaker" page.
 2.  **Step 1: Input Concept**
     *   In the "Story Concept" text area, provide your initial ideas. Refer to the "Concept Document Checklist" below for what to include.
     *   Click "Generate Outline".
