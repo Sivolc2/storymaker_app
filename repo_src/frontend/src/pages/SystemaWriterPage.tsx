@@ -175,23 +175,51 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
     
     // Top navigation bar (replaces old tabs)
     const navItems: {label: string, view: StorymakerView, prerequisite?: (p: typeof project) => boolean, prereqMessage?: string}[] = [
-        { label: "Project Setup", view: 'project_setup' },
-        { label: "1. Concept", view: 'concept', prerequisite: p => !!p },
-        { label: "2. Outline", view: 'outline', prerequisite: p => !!p && !!p.concept.content, prereqMessage: "Concept needed for Outline."},
-        { label: "3. Worldbuilding", view: 'worldbuilding', prerequisite: p => !!p && !!p.outline.content, prereqMessage: "Outline needed for Worldbuilding."},
-        { label: "4. Scene Breakdowns", view: 'scene_breakdowns', prerequisite: p => !!p && !!p.worldbuilding.content, prereqMessage: "Worldbuilding needed for Scene Breakdowns."},
-        { label: "5. Scene Writing", view: 'scene_writing', prerequisite: p => !!p && !!p.sceneBreakdowns.content, prereqMessage: "Scene Breakdowns needed for Scene Writing."},
-        { label: "6. Review & Export", view: 'full_story_review', prerequisite: p => !!p && (!!p.sceneBreakdowns.content || p.sceneNarratives.length > 0), prereqMessage: "Generate some content first." }
+        { label: "🌌 Project Sanctuary", view: 'project_setup' },
+        { 
+            label: "✨ Spark of Idea (Concept)", 
+            view: 'concept', 
+            prerequisite: p => !!p 
+        },
+        { 
+            label: "📜 Unfurling the Scroll (Outline)", 
+            view: 'outline', 
+            prerequisite: p => !!p, // Changed: Only project needs to exist
+            prereqMessage: "A project must exist to weave an Outline."
+        },
+        { 
+            label: "🌍 Whispers of the World (Worldbuilding)", 
+            view: 'worldbuilding', 
+            prerequisite: p => !!p, // Changed: Only project needs to exist
+            prereqMessage: "A project must exist to dream a World."
+        },
+        { 
+            label: "🎞️ Threads of Fate (Scene Breakdowns)", 
+            view: 'scene_breakdowns', 
+            prerequisite: p => !!p && !!p.outline.content && !!p.worldbuilding.content, 
+            prereqMessage: "An Outline and Worldbuilding are needed to lay the Scene Breakdowns."
+        },
+        { 
+            label: "🖋️ Scribing the Scenes", 
+            view: 'scene_writing', 
+            prerequisite: p => !!p && !!p.sceneBreakdowns.content, 
+            prereqMessage: "Scene Breakdowns are needed before Scribing Scenes."
+        },
+        { 
+            label: "📖 The Completed Tome (Review & Export)", 
+            view: 'full_story_review', 
+            prerequisite: p => !!p && (!!p.sceneBreakdowns.content || p.sceneNarratives.length > 0), 
+            prereqMessage: "Weave some parts of your story first." 
+        }
     ];
 
     return (
         <div className="storymaker-container page-container">
-            <h1>Storymaker</h1>
+            <h1>Storymaker ~ Weave Your Worlds</h1>
             {isLoading && <LoadingSpinner />}
             {error && <p className="error-message">Error: {error}</p>}
             
             <input type="file" ref={fileInputRef} multiple onChange={handleFileUpload} accept=".txt,.md" style={{ display: 'none' }} />
-
             <div className="storymaker-page-layout">
                 <div className={`left-panel ${isLeftPanelCollapsed ? 'collapsed' : ''}`}>
                     <div className="collapse-btn-container">
@@ -214,25 +242,29 @@ const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
                     )}
                 </div>
                 <div className="main-content-area">
-                    <div className="sw-tabs-nav">
+                    <nav className="sw-tabs-nav">
                         {navItems.map(item => (
                             <button
                                 key={item.view}
                                 onClick={() => {
                                     setEditingDocument(null); // Close document editor when changing main tabs
-                                    if (!project && item.view !== 'project_setup') {
-                                        setError("Please create or load a project first.");
+                                    const isPrereqMet = !item.prerequisite || (project && item.prerequisite(project));
+                                    if (!isPrereqMet) {
+                                        setError(item.prereqMessage || "A previous step must be completed.");
+                                    } else if (!project && item.view !== 'project_setup') {
+                                         setError("Please create or load a project first.");
                                     } else {
                                         handleSelectView(item.view as StorymakerView);
                                     }
                                 }}
-                                className={activeView === item.view ? 'active' : ''}
-                                disabled={!project && item.view !== 'project_setup'}
+                                className={`sw-tab-button ${activeView === item.view ? 'active' : ''}`}
+                                disabled={(!project && item.view !== 'project_setup') || (item.prerequisite && project && !item.prerequisite(project)) || false}
+                                title={ (item.prerequisite && project && !item.prerequisite(project)) ? item.prereqMessage : '' }
                             >
                                 {item.label}
                             </button>
                         ))}
-                    </div>
+                    </nav>
                     <div className="sw-tab-content-wrapper">
                         {renderMainContent()}
                     </div>

@@ -49,14 +49,14 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
     return (
         <div className="left-panel">
             <h3>{project.projectName}</h3>
-            {project.isLoading && <span className="global-loading-indicator">(Syncing...)</span>}
+            {project.isLoading && <span className="global-loading-indicator">(Conjuring details...)</span>}
             <button 
                 className={`${artifactBaseClass} ${activeView === 'project_setup' ? activeClass : ''}`} 
                 onClick={() => onSelectView('project_setup')}
             >
-                ⚙️ Project Setup
+                🌌 Project Sanctuary
             </button>
-            <h4>Generated Artifacts</h4>
+            <h4>Woven Artifacts</h4>
             <div className="artifact-list">
                 <div 
                     className={`${artifactBaseClass} ${activeView === 'concept' ? activeClass : ''}`}
@@ -88,8 +88,8 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
                 </div>
             </div>
 
-            <h4>Uploaded Documents</h4>
-             <button onClick={onAddDocumentClick} className="add-doc-btn-small">Add Document +</button>
+            <h4>Gathered Scrolls</h4>
+             <button onClick={onAddDocumentClick} className="add-doc-btn-small">Add Scroll +</button>
             <div className="document-list">
                 {project.uploadedDocuments.map(doc => (
                     <div key={doc.id} className={`${artifactBaseClass} ${activeView === `doc_${doc.id}` ? activeClass : ''}`}>
@@ -100,10 +100,10 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
                         </div>
                     </div>
                 ))}
-                {project.uploadedDocuments.length === 0 && <p className="empty-list-text">No documents uploaded.</p>}
+                {project.uploadedDocuments.length === 0 && <p className="empty-list-text">No scrolls gathered.</p>}
             </div>
             
-            <h4>Scene Narratives ({project.sceneNarratives.length})</h4>
+            <h4>Whispers of Scenes ({project.sceneNarratives.length})</h4>
              <div className="artifact-list">
                 {project.sceneNarratives.map(scene => (
                      <div 
@@ -115,7 +115,7 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
                          <button className="edit-btn-small" onClick={(e) => { e.stopPropagation(); onEditArtifact(scene); }}>Edit</button>
                     </div>
                 ))}
-                 {project.sceneNarratives.length === 0 && <p className="empty-list-text">No scenes written yet.</p>}
+                 {project.sceneNarratives.length === 0 && <p className="empty-list-text">No scenes yet whispered.</p>}
             </div>
 
 
@@ -123,7 +123,7 @@ const StorymakerLeftPanel: React.FC<StorymakerLeftPanelProps> = ({
                 className={`${artifactBaseClass} ${activeView === 'full_story_review' ? activeClass : ''} review-button`}
                 onClick={() => onSelectView('full_story_review')}
             >
-                📚 Full Story Review & Export
+                📖 The Completed Tome
             </button>
         </div>
     );

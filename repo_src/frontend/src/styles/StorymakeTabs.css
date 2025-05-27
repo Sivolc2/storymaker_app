@@ -1,70 +1,87 @@
 /* SystemaWriter Tabs Styling */
 .sw-tabs-nav {
     display: flex;
+    flex-wrap: wrap; /* Allow tabs to wrap on smaller screens */
     margin-bottom: 20px;
-    border-bottom: 2px solid var(--border-color, #444);
+    border-bottom: 1px solid var(--border-color-soft);
+    padding-bottom: 5px;
 }
 
-.sw-tabs-nav button {
+.sw-tab-button { /* Changed class name for clarity */
     padding: 10px 15px;
     cursor: pointer;
     border: none;
     background-color: transparent;
-    color: var(--text-color-muted, #aaa);
+    color: var(--text-secondary);
     font-size: 1em;
-    border-bottom: 2px solid transparent; /* For active state */
-    margin-bottom: -2px; /* Align with parent border */
+    font-family: var(--body-font);
+    border-bottom: 3px solid transparent; /* For active state indication */
+    margin-right: 10px; /* Spacing between tabs */
+    margin-bottom: 5px; /* Spacing if tabs wrap */
+    border-radius: 8px 8px 0 0; /* Slightly rounded top corners */
+    transition: var(--transition-soft);
+    opacity: 0.8;
 }
 
-.sw-tabs-nav button.active {
-    color: var(--text-color, #e0e0e0);
-    border-bottom-color: var(--button-primary-bg, #64cfff);
-    font-weight: bold;
+.sw-tab-button.active {
+    color: var(--text-accent);
+    border-bottom-color: var(--lavender-dusty);
+    font-weight: 700;
+    background-color: rgba(155, 134, 189, 0.05); /* Subtle bg for active tab */
+    opacity: 1;
+    box-shadow: 0 -2px 5px rgba(155, 134, 189, 0.1) inset; /* Subtle top inner glow */
 }
 
-.sw-tabs-nav button:disabled {
-    color: var(--text-color-disabled, #666);
+.sw-tab-button:disabled {
+    color: var(--text-secondary);
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-.sw-tabs-nav button:hover:not(:disabled):not(.active) {
-    background-color: var(--hover-bg-color, #3a3a3a);
+.sw-tab-button:hover:not(:disabled):not(.active) {
+    color: var(--silver-moonlight);
+    background-color: rgba(200, 184, 219, 0.03); /* Subtle hover bg */
+    border-bottom-color: var(--silver-moonlight);
 }
 
 .sw-tab-content {
-    /* Styles for the content area of the active tab */
-    padding-top: 10px;
+    padding: 20px 0;
 }
 
+/* Action buttons styling */
 .action-buttons {
     margin-top: 15px;
     display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap */
     gap: 10px; /* Space between buttons */
 }
 
 .approved-text {
-    color: var(--success-color, #4CAF50);
-    font-weight: bold;
+    color: var(--lavender-dusty); /* Use theme accent */
+    font-weight: 700;
     margin-left: 15px;
     display: inline-flex;
     align-items: center;
+    font-family: var(--body-font);
 }
 
 .approved-text button {
     font-size: 0.8em;
     padding: 3px 8px;
     margin-left: 10px;
-    background-color: var(--button-secondary-bg, #555);
+    background-color: var(--input-bg); /* Consistent with other secondary elements */
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color-soft);
 }
 
 .success-message {
-    color: var(--success-color, #4CAF50);
-    font-weight: bold;
+    color: var(--lavender-dusty);
+    font-weight: 700;
     margin-top: 10px;
     padding: 10px;
-    background-color: var(--success-bg, #1a4a1a);
-    border-radius: 5px;
-    border-left: 4px solid var(--success-color, #4CAF50);
+    background-color: rgba(155, 134, 189, 0.1); /* Dusty lavender bg */
+    border-radius: 8px;
+    border-left: 4px solid var(--lavender-dusty);
 }
 
 .uploaded-docs-list {
@@ -73,36 +90,41 @@
     margin-top: 10px;
 }
 
-.uploaded-docs-list li {
-    background-color: var(--input-bg-color, #3a3a3a);
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .remove-doc-btn {
-    background-color: var(--error-text-color, #ff6b6b) !important; /* Important to override general button styles if needed */
-    color: white !important;
-    border: none;
-    padding: 4px 8px !important;
-    font-size: 0.9em !important;
-    border-radius: 3px;
+    color: #FFA07A; /* Light Salmon for remove button text */
     cursor: pointer;
 }
 
-@media (prefers-color-scheme: light) {
-    .sw-tabs-nav { --border-color: #ddd; }
-    .sw-tabs-nav button { --text-color-muted: #777; }
-    .sw-tabs-nav button.active { --text-color: #000; --button-primary-bg: #007bff; }
-    .sw-tabs-nav button:hover:not(:disabled):not(.active) { --hover-bg-color: #f0f0f0; }
-    .sw-tabs-nav button:disabled { --text-color-disabled: #bbb; }
-    .approved-text { --success-color: #28a745; }
-    .approved-text button { --button-secondary-bg: #ccc; }
-    .success-message { --success-color: #28a745; --success-bg: #d4edda; }
+.remove-doc-btn:hover {
+    opacity: 1;
+}
 
-    .uploaded-docs-list li { --input-bg-color: #f1f1f1; }
-    .remove-doc-btn { --error-text-color: #dc3545 !important; }
+.parsed-scene-item {
+    background-color: var(--input-bg); /* Consistent input-like bg */
+    border: 1px solid var(--border-color-soft);
+    border-radius: 8px; /* Organic */
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+.parsed-scene-item strong {
+    color: var(--text-accent); /* Dusty Lavender */
+}
+
+.parsed-scene-item p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.button-small {
+    /* General button styling in theme.css applies; this can be for specific overrides if needed */
+    /* Example: if this needs to be smaller than default button */
+     padding: 0.5em 1em;
+     font-size: 0.9em;
+}
+
+.button-write-scene {
+    /* Already styled by general button theme or can add specific color override */
+    /* background-color: var(--lavender-dusty); color: var(--midnight-blue); */
 } 

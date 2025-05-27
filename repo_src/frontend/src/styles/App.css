@@ -5,10 +5,16 @@
   min-height: 100vh;
 }
 
-.main-nav {
-  background-color: #2c2c2c; /* Darker shade for nav */
+.main-header { /* New class for header */
+  background-color: var(--bg-secondary, #1E2A4A); /* Midnight Blue */
   padding: 10px 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  border-bottom: 1px solid var(--border-color-soft, rgba(155, 134, 189, 0.2));
+}
+
+.main-nav {
+  background-color: transparent; /* Nav is part of header */
+  padding: 10px 20px;
 }
 
 .main-nav ul {
@@ -16,6 +22,7 @@
   padding: 0;
   margin: 0;
   display: flex;
+  align-items: center;
 }
 
 .main-nav li {
@@ -23,42 +30,50 @@
 }
 
 .main-nav a {
-  color: #64cfff; /* Light blue for links */
+  color: var(--text-accent, #9B86BD); /* Dusty Lavender */
   text-decoration: none;
   font-weight: bold;
+  font-family: var(--body-font);
+  font-size: 1.1em;
+  padding: 5px 0;
+  border-bottom: 2px solid transparent;
+  transition: var(--transition-soft);
 }
 
 .main-nav a:hover {
-  text-decoration: underline;
+  color: var(--silver-moonlight);
+  border-bottom-color: var(--silver-moonlight);
 }
 
 .main-content {
   flex-grow: 1;
   width: 100%;
-  max-width: 800px;
+  /* max-width: 800px; Removed for Storymaker layout to take full width */
   margin: 0 auto;
-  padding: 20px; /* Added padding to main content area */
+  padding: 0; /* Padding handled by specific page or layout components */
 }
 
 .page-container {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px; /* Default padding for non-full-width pages like HomePage */
+  font-family: var(--body-font);
 }
 
 .card {
-  background-color: #2f2f2f;
-  border-radius: 8px;
+  background-color: var(--card-bg, #1E2A4A); /* Midnight Blue */
+  border-radius: 15px; /* Organic shape */
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
 }
 
 .card h2 {
   margin-top: 0;
-  color: #64cfff;
-  border-bottom: 1px solid #444;
+  color: var(--text-headings, #9B86BD);
+  border-bottom: 1px solid var(--border-color-soft);
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
@@ -70,7 +85,7 @@
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #e0e0e0;
+  color: var(--text-secondary, #A090B0);
   font-weight: bold;
 }
 
@@ -116,63 +131,58 @@
 }
 
 .button-danger {
-  background-color: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9em;
-  transition: background-color 0.2s ease;
-  margin-left: 10px;
+  background-color: #8B0000; /* Dark Red for lofi theme */
+  color: var(--silver-moonlight);
+  border: 1px solid #A52A2A;
+  border-radius: 20px;
+  transition: var(--transition-soft);
 }
 
 .button-danger:hover {
-  background-color: #ff5252;
+  background-color: #A52A2A;
+  box-shadow: 0 0 10px rgba(139,0,0,0.5);
 }
 
 .error {
-  color: #ff6b6b;
-  background-color: #442222;
+  color: #FFA07A; /* Light Salmon */
+  background-color: rgba(139, 0, 0, 0.3); /* Dark Red transparent */
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 10px;
   margin-bottom: 15px;
-  border: 1px solid #663333;
+  border: 1px solid #A52A2A; /* Brownish Red */
 }
 
 .item {
-  background-color: #3a3a3a;
+  width: 100%;
+  background-color: var(--card-bg, #1E2A4A);
   border-radius: 4px;
   padding: 15px;
   margin-bottom: 10px;
-  border: 1px solid #555;
-}
-
-.item-header {
+  border: 1px solid var(--border-color-soft);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
 }
 
 .item-name {
-  color: #64cfff;
+  color: var(--text-accent, #9B86BD);
   font-weight: bold;
   font-size: 1.1em;
 }
 
 .item-description {
-  color: #ccc;
+  color: var(--text-secondary, #A090B0);
   font-style: italic;
   margin-left: 10px;
 }
 
 .app-footer {
-  background-color: #2c2c2c;
-  color: #aaa;
+  background-color: var(--bg-secondary, #1E2A4A);
+  color: var(--text-secondary, #A090B0);
   text-align: center;
   padding: 15px;
   font-size: 0.9em;
+  border-top: 1px solid var(--border-color-soft, rgba(155, 134, 189, 0.2));
 }
 
 @media (prefers-color-scheme: light) {

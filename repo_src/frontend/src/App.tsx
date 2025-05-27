@@ -11,12 +11,14 @@ function App() {
   return (
     <Router>
       <div className="app-container">
-        <nav className="main-nav">
-          <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/storymaker">Storymaker</Link></li>
-          </ul>
-        </nav>
+        <header className="main-header">
+          <nav className="main-nav">
+            <ul>
+              <li><Link to="/">Home</Link></li>
+              <li><Link to="/storymaker">Storymaker</Link></li>
+            </ul>
+          </nav>
+        </header>
         <main className="main-content">
           <Routes>
             <Route path="/" element={<HomePage apiUrl={apiUrl} />} />
@@ -29,8 +31,8 @@ function App() {
           </Routes>
         </main>
         <footer className="app-footer">
-          <p>&copy; 2024 AI-Friendly Repository</p>
-          <p>Using Vite proxy for API calls</p>
+          <p>&copy; 2024 Storymaker ~ Weave Your Worlds</p>
+          <p>API calls enchanted through Vite proxy</p>
         </footer>
       </div>
     </Router>

@@ -1,0 +1,193 @@
+/* src/styles/theme.css */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&display=swap');
+
+:root {
+  --plum-deep: #2B2F4A;
+  --midnight-blue: #1E2A4A; /* A bit darker than plum for depth */
+  --lavender-dusty: #9B86BD;
+  --silver-moonlight: #C8B8DB;
+  
+  --text-primary: var(--silver-moonlight);
+  --text-secondary: #A090B0; /* A slightly darker, desaturated lavender */
+  --text-accent: var(--lavender-dusty);
+  --text-headings: var(--lavender-dusty);
+
+  --bg-primary: var(--plum-deep);
+  --bg-secondary: var(--midnight-blue);
+  --bg-content-area: #272B44; /* Slightly lighter plum for readability */
+  
+  --accent-glow-color: rgba(155, 134, 189, 0.3); /* Dusty Lavender with alpha */
+  --moonlight-glow-color: rgba(200, 184, 219, 0.2); /* Moonlight Silver with alpha */
+
+  --title-font: 'Cormorant Garamond', serif;
+  --body-font: 'EB Garamond', serif;
+
+  /* For parchment texture on content areas */
+  --parchment-bg-color: #2E3250; /* Base for textured areas, slightly different plum */
+
+  --border-color-soft: rgba(155, 134, 189, 0.2); /* Dusty Lavender border */
+  --border-color-strong: rgba(155, 134, 189, 0.4);
+
+  --button-bg: var(--lavender-dusty);
+  --button-text: var(--midnight-blue);
+  --button-hover-bg: var(--silver-moonlight);
+  --button-hover-text: var(--plum-deep);
+  --button-glow: 0 0 12px var(--accent-glow-color);
+
+  --input-bg: rgba(43, 47, 74, 0.7); /* Darker plum, semi-transparent */
+  --input-border: var(--lavender-dusty);
+  --input-text: var(--silver-moonlight);
+  --input-focus-glow: 0 0 8px var(--moonlight-glow-color);
+  --input-placeholder-text: #79708a; /* Muted lavender */
+
+  --card-bg: var(--midnight-blue);
+  --card-border: var(--border-color-soft);
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 0 40px rgba(43, 47, 74, 0.3); /* Outer shadow + inner plum glow */
+
+  /* Transitions */
+  --transition-soft: all 0.3s ease-in-out;
+}
+
+body {
+  font-family: var(--body-font);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  margin: 0;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scroll from particles */
+  
+  /* Subtle starfield background effect */
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgba(200, 184, 219, 0.1), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(155, 134, 189, 0.08), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(200, 184, 219, 0.12), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(155, 134, 189, 0.06), transparent),
+    radial-gradient(2px 2px at 160px 30px, rgba(200, 184, 219, 0.1), transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: starfield 120s linear infinite;
+}
+
+@keyframes starfield {
+  from { background-position: 0 0; }
+  to { background-position: -200px -100px; }
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0; /* Root takes full viewport */
+  text-align: left; /* Default to left align for content */
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--title-font);
+  color: var(--text-headings);
+  font-weight: 700;
+}
+
+h1 { 
+  font-size: 2.5em; 
+  margin-bottom: 0.5em; 
+  text-shadow: 0 0 8px var(--moonlight-glow-color); 
+}
+h2 { 
+  font-size: 2em; 
+  margin-bottom: 0.4em; 
+  text-shadow: 0 0 5px var(--moonlight-glow-color); 
+}
+h3 { 
+  font-size: 1.6em; 
+  margin-bottom: 0.3em; 
+}
+
+p {
+  font-family: var(--body-font);
+  font-size: 1.1em;
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+a {
+  color: var(--text-accent);
+  text-decoration: none;
+  transition: var(--transition-soft);
+}
+a:hover {
+  color: var(--silver-moonlight);
+  text-shadow: 0 0 5px var(--moonlight-glow-color);
+}
+
+button {
+  font-family: var(--body-font);
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--lavender-dusty); 
+  padding: 0.7em 1.4em;
+  font-size: 1em;
+  font-weight: 700;
+  border-radius: 20px; /* Organic shape */
+  cursor: pointer;
+  transition: var(--transition-soft);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2), 0 0 5px var(--accent-glow-color) inset; /* subtle inset glow */
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-text);
+  box-shadow: var(--button-glow), 0 0 10px var(--silver-moonlight) inset; /* Enhanced glow */
+  transform: translateY(-1px);
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+input[type="text"],
+textarea,
+select {
+  font-family: var(--body-font);
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: 10px; /* Softer organic shape */
+  padding: 0.8em 1em;
+  font-size: 1em;
+  transition: var(--transition-soft);
+  width: calc(100% - 2.2em); /* Account for padding */
+  box-sizing: border-box;
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: var(--input-placeholder-text);
+  opacity: 1; /* Browsers default to lower opacity */
+}
+
+input[type="text"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--silver-moonlight);
+  box-shadow: var(--input-focus-glow), 0 0 0 2px var(--moonlight-glow-color); /* Outer glow on focus */
+}
+
+/* Parchment texture for specific content areas (applied via class or to specific elements) */
+.parchment-bg {
+  background-color: var(--parchment-bg-color);
+  /* Subtle noise texture */
+  background-image: 
+    linear-gradient(45deg, rgba(255,255,255,0.01) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01)),
+    linear-gradient(-45deg, rgba(255,255,255,0.01) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.01));
+  background-size: 5px 5px;
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.3); /* Inner shadow for depth */
+} 
