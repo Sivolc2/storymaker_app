@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useProject } from '../contexts/ProjectContext';
 import ProjectSetupTab from '../components/systemawriter/ProjectSetupTab';
 import ConceptTab from '../components/systemawriter/ConceptTab';
@@ -7,196 +7,239 @@ import WorldbuildingTab from '../components/systemawriter/WorldbuildingTab';
 import SceneBreakdownTab from '../components/systemawriter/SceneBreakdownTab';
 import SceneWritingTab from '../components/systemawriter/SceneWritingTab';
 import FullStoryReviewTab from '../components/systemawriter/FullStoryReviewTab';
+import StorymakerLeftPanel from '../components/systemawriter/StorymakerLeftPanel';
+import PrerequisiteWarningModal from '../components/systemawriter/PrerequisiteWarningModal';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { UploadedDocument as UploadedDocumentType, SceneNarrative as SceneNarrativeType } from '../contexts/ProjectContext';
+
 import '../styles/Storymaker.css';
 import '../styles/StorymakeTabs.css';
+import '../styles/StorymakerLayout.css'; // New layout styles
 
-type SystemaWriterTab = 
+type StorymakerView =
     | 'project_setup' 
     | 'concept' 
     | 'outline' 
     | 'worldbuilding' 
     | 'scene_breakdowns' 
     | 'scene_writing'
-    | 'full_story_review';
+    | 'full_story_review'
+    | `doc_${string}` // For viewing/editing uploaded documents
+    | `scene_${string}_${string}`; // For editing specific scenes
 
 interface SystemaWriterPageProps {
     apiUrl: string;
 }
 
 const SystemaWriterPage: React.FC<SystemaWriterPageProps> = ({ apiUrl }) => {
-    const { project } = useProject();
-    const [activeTab, setActiveTab] = useState<SystemaWriterTab>('project_setup');
+    const { project, removeUploadedDocument, addUploadedDocument } = useProject();
+    const [activeView, setActiveView] = useState<StorymakerView>('project_setup');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
 
-    const handleTabChange = (tab: SystemaWriterTab) => {
-        // Logic to check if tab can be accessed (e.g., previous step approved)
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Warning Modal State
+    const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
+    const [warningMessage, setWarningMessage] = useState('');
+    const [onConfirmWarning, setOnConfirmWarning] = useState<(() => void) | null>(null);
+    
+    const [editingSceneDetails, setEditingSceneDetails] = useState<{chapterTitle: string, sceneIdentifier: string} | null>(null);
+
+
+    useEffect(() => {
         if (!project) {
-            setActiveTab('project_setup'); // Always allow project setup
-            return;
+            setActiveView('project_setup');
         }
-        let canProceed = true;
-        let errorMessage = '';
-        switch (tab) {
-            case 'concept':
-                canProceed = !!project.projectName;
-                if (!canProceed) errorMessage = 'Please create a project first.';
-                break;
-            case 'outline':
-                canProceed = project.concept.isApproved;
-                if (!canProceed) errorMessage = 'Please approve your concept first.';
-                break;
-            case 'worldbuilding':
-                canProceed = project.outline.isApproved;
-                if (!canProceed) errorMessage = 'Please approve your outline first.';
-                break;
-            case 'scene_breakdowns':
-                canProceed = project.worldbuilding.isApproved;
-                if (!canProceed) errorMessage = 'Please approve your worldbuilding first.';
-                break;
-            case 'scene_writing':
-                canProceed = project.sceneBreakdowns.isApproved;
-                if (!canProceed) errorMessage = 'Please approve your scene breakdowns first.';
-                break;
-            case 'full_story_review':
-                // Allow if at least one scene narrative exists or scene breakdowns are approved
-                canProceed = project.sceneBreakdowns.isApproved || project.sceneNarratives.length > 0;
-                if (!canProceed) errorMessage = 'Please approve scene breakdowns or save at least one scene first.';
-                break;
-            default: // project_setup
-                break; 
-        }
-
-        if (canProceed) {
-            setActiveTab(tab);
-            setError(null); // Clear any previous errors
-        } else {
-            setError(errorMessage);
+    }, [project]);
+    
+    const handleSelectView = (view: StorymakerView) => {
+        setError(null); // Clear errors when changing views
+        setActiveView(view);
+    };
+    
+    const handleEditArtifact = (artifact: 'concept' | 'outline' | 'worldbuilding' | 'sceneBreakdowns' | UploadedDocumentType | SceneNarrativeType) => {
+        if (typeof artifact === 'string') {
+            // Map artifact names to view names
+            const viewMap: Record<string, StorymakerView> = {
+                'concept': 'concept',
+                'outline': 'outline', 
+                'worldbuilding': 'worldbuilding',
+                'sceneBreakdowns': 'scene_breakdowns'
+            };
+            setActiveView(viewMap[artifact] || artifact as StorymakerView);
+        } else if ('content' in artifact && 'type' in artifact) { // UploadedDocument
+            // For now, no specific edit view for uploaded docs, could show preview
+            console.log("Viewing/editing uploaded document:", artifact.name);
+            // setActiveView(`doc_${artifact.id}`); // If we had a viewer
+        } else if ('sceneIdentifier' in artifact) { // SceneNarrative
+            setEditingSceneDetails({ chapterTitle: artifact.chapterTitle, sceneIdentifier: artifact.sceneIdentifier });
+            setActiveView('scene_writing');
         }
     };
+
+    const handleAddDocumentClick = () => {
+        fileInputRef.current?.click();
+    };
+    
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (!files || files.length === 0 || !project) return;
+        setIsLoading(true);
+        setError(null);
+
+        for (const file of Array.from(files)) {
+            try {
+                const content = await readFileAsText(file);
+                addUploadedDocument({
+                    id: Date.now().toString() + Math.random().toString(), // Simple unique ID
+                    name: file.name,
+                    content: content,
+                    type: file.type,
+                });
+            } catch (err: any) {
+                setError(`Failed to read file ${file.name}: ${err.message}`);
+            }
+        }
+        setIsLoading(false);
+        if (fileInputRef.current) fileInputRef.current.value = ""; // Reset file input
+    };
+
+    const readFileAsText = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = (error) => reject(error);
+            reader.readAsText(file);
+        });
+    };
+
+    const showPrerequisiteWarning = (message: string, onConfirm: () => void) => {
+        setWarningMessage(message);
+        setOnConfirmWarning(() => onConfirm); // Store the confirm action
+        setIsWarningModalOpen(true);
+    };
+
+    const closeWarningModal = () => {
+        setIsWarningModalOpen(false);
+        setWarningMessage('');
+        setOnConfirmWarning(null);
+    };
+
+    const handleConfirmWarning = () => {
+        if (onConfirmWarning) {
+            onConfirmWarning();
+        }
+        closeWarningModal();
+    };
+
+    const renderMainContent = () => {
+        if (!project && activeView !== 'project_setup') {
+             return <p>Please set up your project first.</p>;
+        }
+        switch (activeView) {
+            case 'project_setup':
+                return <ProjectSetupTab apiUrl={apiUrl} setIsLoading={setIsLoading} setError={setError} onProjectCreated={() => setActiveView('concept')} />;
+            case 'concept':
+                return <ConceptTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onConceptApproved={() => { /* User navigates manually */ }} />;
+            case 'outline':
+                return <OutlineTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onOutlineApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+            case 'worldbuilding':
+                return <WorldbuildingTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onWorldbuildingApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+            case 'scene_breakdowns':
+                return <SceneBreakdownTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} onBreakdownsApproved={() => {}} showPrerequisiteWarning={showPrerequisiteWarning} />;
+            case 'scene_writing':
+                return <SceneWritingTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} showPrerequisiteWarning={showPrerequisiteWarning} initialSceneDetails={editingSceneDetails} setInitialSceneDetails={setEditingSceneDetails} />;
+            case 'full_story_review':
+                return <FullStoryReviewTab apiUrl={apiUrl} isLoading={isLoading} setIsLoading={setIsLoading} setError={setError} />;
+            default:
+                if (activeView.startsWith('doc_')) {
+                    // const docId = activeView.substring(4);
+                    // const doc = project?.uploadedDocuments.find(d => d.id === docId);
+                    // return doc ? <div><h3>{doc.name}</h3><pre>{doc.content}</pre></div> : <p>Document not found.</p>;
+                     return <p>Document viewer/editor not yet implemented. Select an action from the main tabs.</p>;
+                }
+                 return <p>Select an item from the left panel or a tab from above.</p>;
+        }
+    };
+    
+    // Top navigation bar (replaces old tabs)
+    const navItems: {label: string, view: StorymakerView, prerequisite?: (p: typeof project) => boolean, prereqMessage?: string}[] = [
+        { label: "Project Setup", view: 'project_setup' },
+        { label: "1. Concept", view: 'concept', prerequisite: p => !!p },
+        { label: "2. Outline", view: 'outline', prerequisite: p => !!p && !!p.concept.content, prereqMessage: "Concept needed for Outline."},
+        { label: "3. Worldbuilding", view: 'worldbuilding', prerequisite: p => !!p && !!p.outline.content, prereqMessage: "Outline needed for Worldbuilding."},
+        { label: "4. Scene Breakdowns", view: 'scene_breakdowns', prerequisite: p => !!p && !!p.worldbuilding.content, prereqMessage: "Worldbuilding needed for Scene Breakdowns."},
+        { label: "5. Scene Writing", view: 'scene_writing', prerequisite: p => !!p && !!p.sceneBreakdowns.content, prereqMessage: "Scene Breakdowns needed for Scene Writing."},
+        { label: "6. Review & Export", view: 'full_story_review', prerequisite: p => !!p && (!!p.sceneBreakdowns.content || p.sceneNarratives.length > 0), prereqMessage: "Generate some content first." }
+    ];
+
 
     return (
         <div className="storymaker-container page-container">
             <h1>Storymaker</h1>
             {isLoading && <LoadingSpinner />}
             {error && <p className="error-message">Error: {error}</p>}
-
-            {project && <p>Working on Project: <strong>{project.projectName}</strong></p>}
+            
+            <input type="file" ref={fileInputRef} multiple onChange={handleFileUpload} accept=".txt,.md" style={{ display: 'none' }} />
 
             <div className="sw-tabs-nav">
-                <button 
-                    onClick={() => handleTabChange('project_setup')} 
-                    className={activeTab === 'project_setup' ? 'active' : ''}
-                >
-                    Project Setup
-                </button>
-                <button 
-                    onClick={() => handleTabChange('concept')} 
-                    className={activeTab === 'concept' ? 'active' : ''} 
-                    disabled={!project}
-                >
-                    1. Concept
-                </button>
-                <button 
-                    onClick={() => handleTabChange('outline')} 
-                    className={activeTab === 'outline' ? 'active' : ''} 
-                    disabled={!project || !project.concept.isApproved}
-                >
-                    2. Outline
-                </button>
-                <button 
-                    onClick={() => handleTabChange('worldbuilding')} 
-                    className={activeTab === 'worldbuilding' ? 'active' : ''} 
-                    disabled={!project || !project.outline.isApproved}
-                >
-                    3. Worldbuilding
-                </button>
-                <button 
-                    onClick={() => handleTabChange('scene_breakdowns')} 
-                    className={activeTab === 'scene_breakdowns' ? 'active' : ''} 
-                    disabled={!project || !project.worldbuilding.isApproved}
-                >
-                    4. Scene Breakdowns
-                </button>
-                <button 
-                    onClick={() => handleTabChange('scene_writing')} 
-                    className={activeTab === 'scene_writing' ? 'active' : ''} 
-                    disabled={!project || !project.sceneBreakdowns.isApproved}
-                >
-                    5. Scene Writing
-                </button>
-                <button 
-                    onClick={() => handleTabChange('full_story_review')} 
-                    className={activeTab === 'full_story_review' ? 'active' : ''} 
-                    disabled={!project || (!project.sceneBreakdowns.isApproved && project.sceneNarratives.length === 0)}
-                >
-                    6. Review & Export
-                </button>
+                {navItems.map(item => (
+                    <button
+                        key={item.view}
+                        onClick={() => {
+                            if (item.prerequisite && project && !item.prerequisite(project)) {
+                                showPrerequisiteWarning(
+                                    item.prereqMessage || `Prerequisite for ${item.label} not met.`,
+                                    () => handleSelectView(item.view as StorymakerView)
+                                );
+                            } else if (!project && item.view !== 'project_setup') {
+                                setError("Please create or load a project first.");
+                            }
+                            else {
+                                handleSelectView(item.view as StorymakerView);
+                            }
+                        }}
+                        className={activeView === item.view ? 'active' : ''}
+                    >
+                        {item.label}
+                    </button>
+                ))}
             </div>
 
-            <div className="sw-tab-content">
-                {activeTab === 'project_setup' && (
-                    <ProjectSetupTab 
-                        apiUrl={apiUrl} 
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                        onProjectCreated={() => handleTabChange('concept')} 
-                    />
-                )}
-                {project && activeTab === 'concept' && (
-                    <ConceptTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                        onConceptApproved={() => handleTabChange('outline')} 
-                    />
-                )}
-                {project && activeTab === 'outline' && (
-                    <OutlineTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                        onOutlineApproved={() => handleTabChange('worldbuilding')} 
-                    />
-                )}
-                {project && activeTab === 'worldbuilding' && (
-                    <WorldbuildingTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                        onWorldbuildingApproved={() => handleTabChange('scene_breakdowns')} 
-                    />
-                )}
-                {project && activeTab === 'scene_breakdowns' && (
-                    <SceneBreakdownTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                        onBreakdownsApproved={() => handleTabChange('scene_writing')} 
-                    />
-                )}
-                {project && activeTab === 'scene_writing' && (
-                    <SceneWritingTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                    />
-                )}
-                {project && activeTab === 'full_story_review' && (
-                    <FullStoryReviewTab 
-                        apiUrl={apiUrl} 
-                        isLoading={isLoading}
-                        setIsLoading={setIsLoading} 
-                        setError={setError} 
-                    />
-                )}
+            <div className="storymaker-page-layout">
+                <div className={`left-panel ${isLeftPanelCollapsed ? 'collapsed' : ''}`}>
+                    <div className="collapse-btn-container">
+                        <button onClick={() => setIsLeftPanelCollapsed(!isLeftPanelCollapsed)} className="collapse-btn">
+                            {isLeftPanelCollapsed ? '»' : '«'}
+                        </button>
+                    </div>
+                    {!isLeftPanelCollapsed && project && (
+                        <StorymakerLeftPanel
+                            project={project}
+                            activeView={activeView}
+                            onSelectView={(view) => handleSelectView(view as StorymakerView)}
+                            onRemoveDocument={removeUploadedDocument}
+                            onAddDocumentClick={handleAddDocumentClick}
+                            onEditArtifact={handleEditArtifact}
+                        />
+                    )}
+                     {!isLeftPanelCollapsed && !project && (
+                        <p>Create a new project or load an existing one to get started.</p>
+                    )}
+                </div>
+                <div className="main-content-area">
+                    {renderMainContent()}
+                </div>
             </div>
+
+            <PrerequisiteWarningModal
+                isOpen={isWarningModalOpen}
+                message={warningMessage}
+                onConfirm={handleConfirmWarning}
+                onCancel={closeWarningModal}
+            />
         </div>
     );
 };

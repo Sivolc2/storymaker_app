@@ -43,7 +43,7 @@ const ConceptTab: React.FC<ConceptTabProps> = ({ isLoading, setError, onConceptA
         }
         updateArtifact('concept', conceptText, true); // Save and mark as approved
         setSuccessMessage("Concept approved! You can now proceed to Outline generation.");
-        setTimeout(() => onConceptApproved(), 1000); // Small delay to show success message
+        onConceptApproved(); // Notify parent, but user navigates manually
     };
     
     const handleReviseApproval = () => {
@@ -55,7 +55,7 @@ const ConceptTab: React.FC<ConceptTabProps> = ({ isLoading, setError, onConceptA
 
     return (
         <div className="step-card">
-            <h2>1. Story Concept</h2>
+            <h2>Story Concept</h2>
             <p>Provide your core story idea, genre, key characters, plot points, etc. The more detail, the better!</p>
             <a href="/docs/storymaker_usage.md" target="_blank" rel="noopener noreferrer">View Concept Document Checklist</a>
             <textarea
@@ -71,7 +71,7 @@ const ConceptTab: React.FC<ConceptTabProps> = ({ isLoading, setError, onConceptA
                 </button>
                 {!project.concept.isApproved && (
                     <button onClick={handleApproveConcept} disabled={isLoading || !conceptText.trim()}>
-                        Approve Concept & Proceed to Outline &raquo;
+                        Save & Approve Concept
                     </button>
                 )}
                 {project.concept.isApproved && (

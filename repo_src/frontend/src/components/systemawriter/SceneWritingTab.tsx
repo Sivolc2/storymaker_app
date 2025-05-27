@@ -8,9 +8,20 @@ interface SceneWritingTabProps {
     isLoading: boolean;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
+    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
+    initialSceneDetails?: {chapterTitle: string, sceneIdentifier: string} | null;
+    setInitialSceneDetails?: React.Dispatch<React.SetStateAction<{chapterTitle: string, sceneIdentifier: string} | null>>;
 }
 
-const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ apiUrl, isLoading, setIsLoading, setError }) => {
+const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ 
+    apiUrl, 
+    isLoading, 
+    setIsLoading, 
+    setError, 
+    showPrerequisiteWarning,
+    initialSceneDetails,
+    setInitialSceneDetails
+}) => {
     const { project, updateSceneNarrative, getSceneNarrative } = useProject();
     const [sceneBreakdownsData, setSceneBreakdownsData] = useState<{[chapterTitle: string]: string} | null>(null);
     const [selectedChapter, setSelectedChapter] = useState<string>('');
@@ -38,6 +49,27 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ apiUrl, isLoading, se
         }
     }, [project?.sceneBreakdowns.content, selectedChapter]);
 
+    // Handle initialSceneDetails for editing specific scenes from left panel
+    useEffect(() => {
+        if (initialSceneDetails && project) {
+            setSelectedChapter(initialSceneDetails.chapterTitle);
+            setSceneIdentifier(initialSceneDetails.sceneIdentifier);
+            
+            // Load the existing scene content
+            const existingScene = getSceneNarrative(initialSceneDetails.chapterTitle, initialSceneDetails.sceneIdentifier);
+            if (existingScene) {
+                setEditedNarrative(existingScene.content);
+                setGeneratedNarrative(existingScene.content);
+                setIsEditingNarrative(true);
+            }
+            
+            // Clear the initial scene details after loading
+            if (setInitialSceneDetails) {
+                setInitialSceneDetails(null);
+            }
+        }
+    }, [initialSceneDetails, project, getSceneNarrative, setInitialSceneDetails]);
+
     useEffect(() => {
         // Clear success message after 3 seconds
         if (successMessage) {
@@ -46,7 +78,7 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ apiUrl, isLoading, se
         }
     }, [successMessage]);
 
-    const handleGenerateSceneNarrative = async () => {
+    const proceedWithGeneration = async () => {
         if (!project || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()) {
             setError("Please select a chapter, provide a scene identifier, and enter a scene plan.");
             return;
@@ -70,6 +102,21 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ apiUrl, isLoading, se
             setError(err.message || "Failed to generate scene narrative.");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleGenerateSceneNarrative = () => {
+        if (!project || !selectedChapter || !sceneIdentifier.trim() || !scenePlan.trim()) {
+            setError("Please select a chapter, provide a scene identifier, and enter a scene plan.");
+            return;
+        }
+        if (!project.sceneBreakdowns.isApproved) {
+            showPrerequisiteWarning(
+                "The Scene Breakdowns are not yet approved. Generating scene narratives with unapproved breakdowns might lead to rework. Do you want to proceed?",
+                proceedWithGeneration
+            );
+        } else {
+            proceedWithGeneration();
         }
     };
 
@@ -113,12 +160,15 @@ const SceneWritingTab: React.FC<SceneWritingTabProps> = ({ apiUrl, isLoading, se
     };
 
     if (!project) return <p>Please create or load a project first.</p>;
+    if (!project.sceneBreakdowns.content && !isLoading) {
+        return <p>Please complete the 'Scene Breakdowns' step before writing scenes.</p>;
+    }
 
     const savedScenesCount = project.sceneNarratives.length;
 
     return (
         <div className="step-card">
-            <h2>5. Scene Writing</h2>
+            <h2>Scene Writing</h2>
             <p>Generate individual scene narratives based on your approved scene breakdowns.</p>
             
             {savedScenesCount > 0 && (

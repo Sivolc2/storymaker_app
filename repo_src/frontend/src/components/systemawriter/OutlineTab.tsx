@@ -9,19 +9,25 @@ interface OutlineTabProps {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
     onOutlineApproved: () => void;
+    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
 }
 
-const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onOutlineApproved }) => {
+const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onOutlineApproved, showPrerequisiteWarning }) => {
     const { project, updateArtifact } = useProject();
     const [outlineText, setOutlineText] = useState(project?.outline.content || '');
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(!project?.outline.content);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (project) {
             setOutlineText(project.outline.content);
+            if (!project.outline.content && !project.outline.isApproved) {
+                setIsEditing(true);
+            } else if (project.outline.isApproved) {
+                setIsEditing(false);
+            }
         }
-    }, [project?.outline.content]);
+    }, [project?.outline.content, project?.outline.isApproved]);
 
     useEffect(() => {
         // Clear success message after 3 seconds
@@ -31,11 +37,8 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
         }
     }, [successMessage]);
 
-    const handleGenerateOutline = async () => {
-        if (!project || !project.concept.content.trim()) {
-            setError("Please provide a story concept first.");
-            return;
-        }
+    const proceedWithGeneration = async () => {
+        if (!project) return;
         setIsLoading(true);
         setError(null);
         try {
@@ -46,7 +49,8 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
             const data = await generateOutline(apiUrl, { concept_document: conceptWithContext });
             setOutlineText(data.outline_md);
             updateArtifact('outline', data.outline_md, false); // Save but don't auto-approve
-            setSuccessMessage("Outline generated successfully!");
+            setIsEditing(true);
+            setSuccessMessage("Outline generated successfully! You can now edit and/or approve it.");
         } catch (err: any) {
             setError(err.message || "Failed to generate outline.");
         } finally {
@@ -54,90 +58,87 @@ const OutlineTab: React.FC<OutlineTabProps> = ({ apiUrl, isLoading, setIsLoading
         }
     };
 
-    const handleSaveOutline = () => {
-        if (!project) return;
-        setError(null);
-        updateArtifact('outline', outlineText, project.outline.isApproved);
-        setIsEditing(false);
-        setSuccessMessage("Outline saved successfully!");
-    };
-
-    const handleApproveOutline = () => {
-        if (!project || !outlineText.trim()) {
-            setError("Outline cannot be empty to approve.");
+    const handleGenerateOutline = () => {
+        if (!project || !project.concept.content.trim()) {
+            setError("Please provide a story concept first.");
             return;
         }
-        updateArtifact('outline', outlineText, true);
-        setIsEditing(false);
-        onOutlineApproved();
-        setSuccessMessage("Outline approved and proceeding to worldbuilding!");
+        if (!project.concept.isApproved) {
+            showPrerequisiteWarning(
+                "The Story Concept is not yet approved. Generating an outline with an unapproved concept might lead to rework. Do you want to proceed?",
+                proceedWithGeneration
+            );
+        } else {
+            proceedWithGeneration();
+        }
+    };
+
+    const handleSaveOutline = (approve: boolean) => {
+        if (!project) return;
+        setError(null);
+        updateArtifact('outline', outlineText, approve);
+        setIsEditing(!approve);
+        setSuccessMessage(approve ? "Outline approved and saved!" : "Outline saved!");
+        if (approve) {
+            onOutlineApproved();
+        }
     };
 
     const handleReviseApproval = () => {
         if (!project) return;
         updateArtifact('outline', outlineText, false);
         setIsEditing(true);
-        setSuccessMessage("Outline revised and awaiting approval.");
+        setSuccessMessage("Outline approval revised. You can now edit the outline.");
     };
 
     if (!project) return <p>Please create or load a project first.</p>;
+    if (!project.concept.content && !isLoading) {
+        return <p>Please complete the 'Concept' step before generating an outline.</p>;
+    }
 
     return (
         <div className="step-card">
-            <h2>2. Story Outline</h2>
+            <h2>Story Outline</h2>
             <p>Generate or edit your story outline. This will structure your chapters and main plot points.</p>
             
-            <div className="action-buttons">
-                <button onClick={handleGenerateOutline} disabled={isLoading || project.outline.isApproved}>
-                    Generate Outline with AI
-                </button>
-                {outlineText && !isEditing && !project.outline.isApproved && (
-                    <button onClick={() => setIsEditing(true)}>
-                        Edit Outline
-                    </button>
-                )}
-            </div>
-
-            {outlineText && (
-                <div style={{ marginTop: '20px' }}>
-                    {isEditing || !project.outline.isApproved ? (
-                        <div>
-                            <h3>Edit Outline:</h3>
+            {(!isEditing && project.outline.isApproved) ? (
+                 <div>
+                    <h3>Approved Outline:</h3>
+                    <div className="markdown-content">
+                        <ReactMarkdown>{outlineText}</ReactMarkdown>
+                    </div>
+                    <div className="action-buttons">
+                        <button onClick={handleReviseApproval}>Revise Approval & Edit</button>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="action-buttons">
+                        <button onClick={handleGenerateOutline} disabled={isLoading}>
+                            Generate Outline with AI
+                        </button>
+                    </div>
+                    { (outlineText || isEditing) && (
+                        <div style={{ marginTop: '20px' }}>
+                            <h3>{project.outline.isApproved ? "Approved Outline (Editing)" : "Edit Outline:"}</h3>
                             <textarea
                                 value={outlineText}
                                 onChange={(e) => setOutlineText(e.target.value)}
                                 rows={20}
                                 style={{ width: '100%' }}
+                                placeholder="Your story outline will appear here. You can also manually type or paste it."
                             />
                             <div className="action-buttons">
-                                <button onClick={handleSaveOutline}>
-                                    Save Outline
+                                <button onClick={() => handleSaveOutline(false)} disabled={isLoading}>
+                                    Save Draft
                                 </button>
-                                <button onClick={handleApproveOutline} disabled={!outlineText.trim()}>
-                                    Approve Outline & Proceed to Worldbuilding &raquo;
+                                <button onClick={() => handleSaveOutline(true)} disabled={isLoading || !outlineText.trim()}>
+                                    Save & Approve Outline
                                 </button>
-                                {isEditing && (
-                                    <button onClick={() => setIsEditing(false)}>
-                                        Cancel Edit
-                                    </button>
-                                )}
                             </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <h3>Generated Outline:</h3>
-                            <div className="markdown-content">
-                                <ReactMarkdown>{outlineText}</ReactMarkdown>
-                            </div>
-                            {project.outline.isApproved && (
-                                <p className="approved-text">
-                                    ✓ Outline Approved. 
-                                    <button onClick={handleReviseApproval}>Revise Approval</button>
-                                </p>
-                            )}
                         </div>
                     )}
-                </div>
+                </>
             )}
             {successMessage && <p className="success-message">{successMessage}</p>}
         </div>

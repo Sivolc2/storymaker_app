@@ -31,7 +31,6 @@ else:
 # as db connection might depend on them.
 from repo_src.backend.database.setup import init_db
 from repo_src.backend.database import models, connection # For example endpoints
-from repo_src.backend.functions.items import router as items_router # Import the items router
 from repo_src.backend.routers.systemawriter_router import router as systemawriter_router # Import the SystemaWriter router
 
 @asynccontextmanager
@@ -57,8 +56,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-# Include the items router
-app.include_router(items_router)
 # Include the SystemaWriter router
 app.include_router(systemawriter_router, prefix="/api/systemawriter", tags=["systemawriter"])
 

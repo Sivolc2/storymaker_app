@@ -1,26 +1,26 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 // Define types for project artifacts
-interface UploadedDocument {
+export interface UploadedDocument {
     id: string;
     name: string;
     content: string; // Text content
     type: string; // e.g., 'text/plain', 'application/pdf'
 }
 
-interface ProjectArtifact {
+export interface ProjectArtifact {
     content: string; // Markdown or structured data
     isApproved: boolean;
     lastModified: Date;
 }
 
-interface SceneNarrative extends ProjectArtifact {
+export interface SceneNarrative extends ProjectArtifact {
     sceneIdentifier: string; // e.g., "Chapter 1 - Scene 1.1"
     chapterTitle: string;
     sceneOrderHeuristic: number;
 }
 
-interface ProjectState {
+export interface ProjectState {
     projectName: string;
     uploadedDocuments: UploadedDocument[];
     concept: ProjectArtifact;

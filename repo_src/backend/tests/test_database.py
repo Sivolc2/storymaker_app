@@ -9,7 +9,6 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from repo_src.backend.database.connection import Base, get_db
-from repo_src.backend.database.models import Item # Import your models
 from repo_src.backend.main import app 
 
 from fastapi.testclient import TestClient
@@ -56,20 +55,6 @@ def override_get_db_for_tests():
 app.dependency_overrides[get_db] = override_get_db_for_tests
 
 client = TestClient(app) # TestClient that uses the overridden get_db
-
-def test_create_item_in_db(db_session_func: SQLAlchemySession):
-    # Direct database interaction test using the db_session_func fixture
-    new_item = Item(name="Test Item Direct", description="This is a test item created directly.")
-    db_session_func.add(new_item)
-    db_session_func.commit()
-    db_session_func.refresh(new_item)
-
-    assert new_item.id is not None
-    assert new_item.name == "Test Item Direct"
-
-    retrieved_item = db_session_func.query(Item).filter(Item.id == new_item.id).first()
-    assert retrieved_item is not None
-    assert retrieved_item.name == "Test Item Direct"
 
 def test_read_root_endpoint():
     response = client.get("/") # Uses TestClient with overridden DB

@@ -9,28 +9,38 @@ interface WorldbuildingTabProps {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     setError: React.Dispatch<React.SetStateAction<string | null>>;
     onWorldbuildingApproved: () => void;
+    showPrerequisiteWarning: (message: string, onConfirm: () => void) => void;
 }
 
-const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onWorldbuildingApproved }) => {
+const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, setIsLoading, setError, onWorldbuildingApproved, showPrerequisiteWarning }) => {
     const { project, updateArtifact } = useProject();
     const [worldbuildingText, setWorldbuildingText] = useState(project?.worldbuilding.content || '');
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(!project?.worldbuilding.content);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (project) {
             setWorldbuildingText(project.worldbuilding.content);
+            if (!project.worldbuilding.content && !project.worldbuilding.isApproved) {
+                setIsEditing(true);
+            } else if (project.worldbuilding.isApproved) {
+                setIsEditing(false);
+            }
         }
-    }, [project?.worldbuilding.content]);
+    }, [project?.worldbuilding.content, project?.worldbuilding.isApproved]);
 
-    const handleGenerateWorldbuilding = async () => {
-        if (!project || !project.concept.content.trim() || !project.outline.content.trim()) {
-            setError("Please provide a story concept and approved outline first.");
-            return;
+    useEffect(() => {
+        if (successMessage) {
+            const timer = setTimeout(() => setSuccessMessage(null), 3000);
+            return () => clearTimeout(timer);
         }
+    }, [successMessage]);
+
+    const proceedWithGeneration = async () => {
+        if (!project) return;
         setIsLoading(true);
         setError(null);
         try {
-            // Include uploaded documents for context
             const contextDocs = project.uploadedDocuments.map(doc => doc.content).join('\n\n');
             const conceptWithContext = project.concept.content + (contextDocs ? '\n\n--- Context Documents ---\n\n' + contextDocs : '');
             
@@ -39,7 +49,9 @@ const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, 
                 approved_outline_md: project.outline.content 
             });
             setWorldbuildingText(data.worldbuilding_md);
-            updateArtifact('worldbuilding', data.worldbuilding_md, false); // Save but don't auto-approve
+            updateArtifact('worldbuilding', data.worldbuilding_md, false);
+            setIsEditing(true);
+            setSuccessMessage("Worldbuilding generated successfully! You can now edit and/or approve it.");
         } catch (err: any) {
             setError(err.message || "Failed to generate worldbuilding.");
         } finally {
@@ -47,88 +59,89 @@ const WorldbuildingTab: React.FC<WorldbuildingTabProps> = ({ apiUrl, isLoading, 
         }
     };
 
-    const handleSaveWorldbuilding = () => {
-        if (!project) return;
-        setError(null);
-        updateArtifact('worldbuilding', worldbuildingText, project.worldbuilding.isApproved);
-        setIsEditing(false);
-    };
-
-    const handleApproveWorldbuilding = () => {
-        if (!project || !worldbuildingText.trim()) {
-            setError("Worldbuilding cannot be empty to approve.");
+    const handleGenerateWorldbuilding = () => {
+        if (!project || !project.concept.content.trim() || !project.outline.content.trim()) {
+            setError("Please provide a story concept and outline first.");
             return;
         }
-        updateArtifact('worldbuilding', worldbuildingText, true);
-        setIsEditing(false);
-        onWorldbuildingApproved();
+        if (!project.outline.isApproved) {
+            showPrerequisiteWarning(
+                "The Story Outline is not yet approved. Generating worldbuilding with an unapproved outline might lead to rework. Do you want to proceed?",
+                proceedWithGeneration
+            );
+        } else {
+            proceedWithGeneration();
+        }
+    };
+
+    const handleSaveWorldbuilding = (approve: boolean) => {
+        if (!project) return;
+        setError(null);
+        updateArtifact('worldbuilding', worldbuildingText, approve);
+        setIsEditing(!approve);
+        setSuccessMessage(approve ? "Worldbuilding approved and saved!" : "Worldbuilding saved!");
+        if (approve) {
+            onWorldbuildingApproved();
+        }
     };
 
     const handleReviseApproval = () => {
         if (!project) return;
         updateArtifact('worldbuilding', worldbuildingText, false);
         setIsEditing(true);
+        setSuccessMessage("Worldbuilding approval revised. You can now edit the worldbuilding.");
     };
 
     if (!project) return <p>Please create or load a project first.</p>;
+    if (!project.outline.content && !isLoading) {
+        return <p>Please complete the 'Outline' step before generating worldbuilding.</p>;
+    }
 
     return (
         <div className="step-card">
-            <h2>3. Worldbuilding</h2>
+            <h2>Worldbuilding</h2>
             <p>Generate or edit your worldbuilding details including character profiles, setting descriptions, and background information.</p>
             
-            <div className="action-buttons">
-                <button onClick={handleGenerateWorldbuilding} disabled={isLoading || project.worldbuilding.isApproved}>
-                    Generate Worldbuilding with AI
-                </button>
-                {worldbuildingText && !isEditing && !project.worldbuilding.isApproved && (
-                    <button onClick={() => setIsEditing(true)}>
-                        Edit Worldbuilding
-                    </button>
-                )}
-            </div>
-
-            {worldbuildingText && (
-                <div style={{ marginTop: '20px' }}>
-                    {isEditing || !project.worldbuilding.isApproved ? (
-                        <div>
-                            <h3>Edit Worldbuilding:</h3>
+            {(!isEditing && project.worldbuilding.isApproved) ? (
+                 <div>
+                    <h3>Approved Worldbuilding:</h3>
+                    <div className="markdown-content">
+                        <ReactMarkdown>{worldbuildingText}</ReactMarkdown>
+                    </div>
+                    <div className="action-buttons">
+                        <button onClick={handleReviseApproval}>Revise Approval & Edit</button>
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="action-buttons">
+                        <button onClick={handleGenerateWorldbuilding} disabled={isLoading}>
+                            Generate Worldbuilding with AI
+                        </button>
+                    </div>
+                    { (worldbuildingText || isEditing) && (
+                        <div style={{ marginTop: '20px' }}>
+                            <h3>{project.worldbuilding.isApproved ? "Approved Worldbuilding (Editing)" : "Edit Worldbuilding:"}</h3>
                             <textarea
                                 value={worldbuildingText}
                                 onChange={(e) => setWorldbuildingText(e.target.value)}
                                 rows={20}
                                 style={{ width: '100%' }}
+                                placeholder="Your worldbuilding details will appear here. You can also manually type or paste them."
                             />
                             <div className="action-buttons">
-                                <button onClick={handleSaveWorldbuilding}>
-                                    Save Worldbuilding
+                                <button onClick={() => handleSaveWorldbuilding(false)} disabled={isLoading}>
+                                    Save Draft
                                 </button>
-                                <button onClick={handleApproveWorldbuilding} disabled={!worldbuildingText.trim()}>
-                                    Approve Worldbuilding & Proceed to Scene Breakdowns &raquo;
+                                <button onClick={() => handleSaveWorldbuilding(true)} disabled={isLoading || !worldbuildingText.trim()}>
+                                    Save & Approve Worldbuilding
                                 </button>
-                                {isEditing && (
-                                    <button onClick={() => setIsEditing(false)}>
-                                        Cancel Edit
-                                    </button>
-                                )}
                             </div>
-                        </div>
-                    ) : (
-                        <div>
-                            <h3>Generated Worldbuilding:</h3>
-                            <div className="markdown-content">
-                                <ReactMarkdown>{worldbuildingText}</ReactMarkdown>
-                            </div>
-                            {project.worldbuilding.isApproved && (
-                                <p className="approved-text">
-                                    ✓ Worldbuilding Approved. 
-                                    <button onClick={handleReviseApproval}>Revise Approval</button>
-                                </p>
-                            )}
                         </div>
                     )}
-                </div>
+                </>
             )}
+            {successMessage && <p className="success-message">{successMessage}</p>}
         </div>
     );
 };
